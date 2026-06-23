@@ -1005,8 +1005,8 @@ class POS:
             cur = conn.cursor()
 
             cur.execute("""
-            DELETE FROM users
-            WHERE username = ?
+                DELETE FROM users
+                WHERE username = ?
             """, (username,))
 
             conn.commit()
@@ -1020,16 +1020,16 @@ class POS:
             win,
             text="Add User",
             command=add_user,
-            bg="white",
-            fg="green"
+            bg="#FFFFFF",
+            fg="#50C878"
         ).pack(pady=5)
 
         tk.Button(
             win,
             text="Delete User",
             command=delete_user,
-            bg="white",
-            fg="red"
+            bg="#FFFFFF",
+            fg="#8B0000"
         ).pack(pady=5)
 
     def return_key(self, event):
@@ -1059,9 +1059,9 @@ class POS:
 
         cur.execute("""
         SELECT username
-        FROM users
-        WHERE password = ?
-        AND role = 'manager'
+            FROM users
+            WHERE password = ?
+            AND role = 'manager'
         """, (password,))
 
         manager = cur.fetchone()
@@ -1269,8 +1269,8 @@ class POS:
                 text=key,
                 width=150,
                 height=60,
-                bg="blue",
-                fg="white",
+                bg="#1434A4",
+                fg="#FFFFFF",
                 bd=0,
                 highlightthickness=2,
                 relief="raised",
@@ -1281,8 +1281,8 @@ class POS:
             self.root,
             text="Checkout",
             command=self.checkout,
-            bg="lightgray",
-            fg="black",
+            bg="#7393B3",
+            fg="#FFFFFF",
             width=150,
             height=60,
             padx=0, pady=0,
@@ -1294,8 +1294,8 @@ class POS:
             self.root,
             text="VOID",
             command=self.void_item,
-            bg="red",
-            fg="white",
+            bg="#8B0000",
+            fg="#FFFFFF",
             highlightthickness=2,
             relief="raised",
             width=150,
@@ -1306,8 +1306,8 @@ class POS:
             self.root,
             text="VOID TXN",
             command=self.void_transaction_by_number,
-            bg="darkred",
-            fg="white",
+            bg="#8B0000",
+            fg="#FFFFFF",
             width=150,
             height=60
         ).grid(row=6, column=3)
@@ -1317,8 +1317,8 @@ class POS:
             text="X Report",
             width=150,
             height=60,
-            bg="yellow",
-            fg="black",
+            bg="#FFEA00",
+            fg="#000000",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1330,9 +1330,9 @@ class POS:
             text="Z Report",
             width=150,
             height=60,
-            bg="red",
+            bg="#8B0000",
+            fg="#FFFFFF",
             padx=0, pady=0,
-            fg="white",
             highlightthickness=2,
             relief="raised",
             command=self.show_z_report
@@ -1342,8 +1342,8 @@ class POS:
             self.root,
             text="Users",
             command=self.manage_users,
-            bg="purple",
-            fg="white",
+            bg="#800080",
+            fg="#FFFFFF",
             highlightthickness=2,
             relief="raised",
             width=150,
@@ -1355,8 +1355,8 @@ class POS:
             self.root,
             text=DEPT001,
             command=partial(self.department,"DEPT001"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             highlightthickness=2,
             relief="raised",
             padx=0, pady=0,
@@ -1368,8 +1368,8 @@ class POS:
             self.root,
             text=DEPT002,
             command=partial(self.department,"DEPT002"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             highlightthickness=2,
             relief="raised",
             padx=0, pady=0,
@@ -1381,8 +1381,8 @@ class POS:
             self.root,
             text=DEPT003,
             command=partial(self.department,"DEPT003"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1394,8 +1394,8 @@ class POS:
             self.root,
             text=DEPT004,
             command=partial(self.department,"DEPT004"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1407,8 +1407,8 @@ class POS:
             self.root,
             text=DEPT005,
             command=partial(self.department,"DEPT005"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1420,8 +1420,8 @@ class POS:
             self.root,
             text=DEPT006,
             command=partial(self.department,"DEPT006"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1433,8 +1433,8 @@ class POS:
             self.root,
             text=DEPT007,
             command=partial(self.department,"DEPT007"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1446,8 +1446,8 @@ class POS:
             self.root,
             text=DEPT008,
             command=partial(self.department,"DEPT008"),
-            bg="green",
-            fg="white",
+            bg="#50C878",
+            fg="#FFFFFF",
             padx=0, pady=0,
             highlightthickness=2,
             relief="raised",
@@ -1459,8 +1459,8 @@ class POS:
             self.root,
             text="Logout",
             command=self.logout,
-            bg="orange",
-            fg="black",
+            bg="#FFA500",
+            fg="#000000",
             highlightthickness=2,
             relief="raised",
             width=150,
@@ -1762,7 +1762,7 @@ class POS:
         total_due,
         cash,
         change,
-        user,
+        name,
         payment_type,
         check_number=None,
         card_last4=None):
@@ -1812,7 +1812,7 @@ class POS:
 
         receipt_output.append("{:>37} ${:8.2f}".format("Change:",change))
         receipt_output.append("")
-        receipt_output.append(f"Sale Id #{sale_id:08d} cashier: {user}"  )
+        receipt_output.append(f"Sale Id #{sale_id:08d} cashier: {name}"  )
         receipt_output.append("")
         receipt_output.append("Thank You For Shopping!")
         receipt_output.append("")
@@ -1948,6 +1948,22 @@ class POS:
 
             pay_type = payment_type.get()
 
+            conn = sqlite3.connect(DB_NAME)
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT name
+                FROM users
+                WHERE username = ?
+            """, (self.user["username"],))
+
+            row = cur.fetchone()
+
+            if row:
+                sname = row[0]
+            else:
+                sname = name
+
             cash = 0
             change = 0
             check_number = None
@@ -2080,7 +2096,7 @@ class POS:
                 total_due,
                 cash,
                 change,
-                user,
+                sname,
                 pay_type,
                 check_number,
                 card_last4
