@@ -12,7 +12,17 @@ from escpos.printer import Usb
 from barcode import Code128
 from barcode.writer import ImageWriter
 
+#------------------------------------------------------------------
+# Point of Sale System (POS)
+# Developed by Patrick Beeson
+# (C) 2026 Patrick Beeson
+# Change Log:
+# Date        Who          Reason
+# 2026-06-23  Patrick B.   Initial Release
+#-------------------------------------------------------------------
 
+
+# Set the following for your system.
 DB_NAME = "pos.db"
 COMPANY_NAME = "Test Company"
 COMPANY_ADDRESS = "3420 Hwy 98"
