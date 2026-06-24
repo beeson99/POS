@@ -12,6 +12,8 @@ from CTkMessagebox import CTkMessagebox
 from escpos.printer import Usb  
 from barcode import Code128
 from barcode.writer import ImageWriter
+from PIL import Image
+import logging
 
 #------------------------------------------------------------------
 # Point of Sale System (POS)
@@ -23,11 +25,13 @@ from barcode.writer import ImageWriter
 #-------------------------------------------------------------------
 
 
+
 # Set the following for your system.
 DB_NAME = "pos.db"
-COMPANY_NAME = "Test Company"
-COMPANY_ADDRESS = "3420 Hwy 98"
+COMPANY_NAME = "The Kitchen"
+COMPANY_ADDRESS = "111 Main Street"
 COMPANY_ADDRESS2 = "Yourtown, NY 01111"
+COMPANY_LOGO="—Pngtree—kitchen store logo_21004253.png"
 COMPANY_TELEPHONE="802-999-9999"
 TAX_RATE = 0.06
 DEPT001="Food"
@@ -39,7 +43,6 @@ DEPT006="Dept 006"
 DEPT007="Dept 007"
 DEPT008="Dept 008"
 
-ctk.set_appearance_mode("system") 
 #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 #Printer Code for RONGTA Thermal Printers
@@ -206,18 +209,55 @@ def get_product(sku):
 
 def print_report(report_text,barcodetext):
 
-    barcode = Code128(barcodetext, writer=ImageWriter())
-    barcode.save("barcode")
+    barcode = Code128(
+        barcodetext,
+        writer=ImageWriter()
+        )
+
+    barcode.save(
+        "barcode",
+        options={
+            "module_width": 0.1,   # default ~0.2
+            "module_height": 7,    # default ~15
+            "quiet_zone": 1,
+            "font_size": 0,        # remove text under barcode
+            "text_distance": 1
+        }
+        )
 
     p = Usb(0x0fe6, 0x811e)
     p.set(align='left', width=1, height=1)
+
+    # Image to top
+    logo = Image.open(COMPANY_LOGO)
+
+    max_width = 576
+
+    if logo.width > max_width:
+        ratio = max_width / logo.width
+
+    logo = logo.resize(
+        (
+            int(logo.width * ratio),
+            int(logo.height * ratio)
+        ),
+        Image.LANCZOS
+    )
+
+    logo.save("logo_print.png")
     
     # Replace with your Rongta USB Vendor ID and Product ID
     print (barcodetext)
     if barcodetext is not None:
+        try:
+            #p._raw(b'\x1b\x61\x01')   # center
+            p.image("logo_print.png")
+            #p._raw(b'\x1b\x61\x00')   # left
+        except Exception as e:
+            print(f"Logo Error: {e}")
         p.text(report_text)
-        p.set(align='center')
-        p.image("barcode.png")
+        #p._raw(b'\x1b\x61\x01')
+        p.image("barcode.png",center=True)
         p.text("\n\n\n")
 
     try:
@@ -229,7 +269,7 @@ def print_report(report_text,barcodetext):
 
 def print_x_report(report_text):
 
-    p = Usb(0x0fe6, 0x811e)
+    p = Usb(0x0fe6, 0x811e, profile="simple")
     p.set(align='left', width=1, height=1)
     p.text(report_text)
     p.text("\n\n\n")
@@ -1774,6 +1814,7 @@ class POS:
         if not self.cart:
             return
         
+        logging.getLogger("media").setLevel(logging.ERROR)
         current_date = datetime.now()
         formatted_date = current_date.strftime("%m/%d/%Y %H:%M")
 
@@ -1966,7 +2007,7 @@ class POS:
             if row:
                 sname = row[0]
             else:
-                sname = name
+                sname = self.user["username"]
 
             cash = 0
             change = 0
