@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkmacosx import Button
+from tkmacosx import CircleButton
 from tkinter import messagebox
 from tkinter import simpledialog
 from functools import partial
@@ -1261,208 +1262,211 @@ class POS:
             ["1","2","3"],
             ["0",".","C","Enter"]
         ]
+        self.root.grid_columnconfigure(0, minsize=50)
 
-        for r,row in enumerate(keypad):
-            for c,key in enumerate(row):
-                Button(
-                self.root,
-                text=key,
-                width=150,
-                height=60,
-                bg="#1434A4",
-                fg="#FFFFFF",
-                bd=0,
-                highlightthickness=2,
-                relief="raised",
-                command=lambda k=key: self.key_press(k)
-                ).grid(row=r+4,column=c)
+        # Seperate Fram for the Keypad.  Done to make the round buttons look better.
+        keypad_frame = tk.Frame(self.root)
+        keypad_frame.grid(
+            row=4,
+            column=0,
+            rowspan=4,
+            columnspan=3,
+            padx=(90,0),
+            pady=10,
+            
+            )
+
+        for r, row in enumerate(keypad):
+            for c, key in enumerate(row):
+                CircleButton(
+                    keypad_frame,
+                    text=key,
+                    width=60,
+                    height=60,
+                    bg="#1434A4",
+                    fg="#FFFFFF",
+                    bordercolor="#333333",
+                    radius=30,
+                    command=lambda k=key: self.key_press(k)
+                ).grid(
+                    row=r+4,
+                    column=c+1,
+                    padx=3,
+                    pady=3
+                )
+        
+        #seperate keyboard from root so things will display correctly.
+        keyboard_frame = tk.Frame(self.root)
+        keyboard_frame.grid(
+            row=4,
+            column=4,
+            rowspan=4,
+            columnspan=6,
+            padx=(10,0),
+            pady=10
+            )
 
         Button(
-            self.root,
+            keyboard_frame,
             text="Checkout",
             command=self.checkout,
             bg="#7393B3",
             fg="#FFFFFF",
+            bordercolor="#333333",
             width=150,
-            height=60,
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            height=60
         ).grid(row=4,column=3)
 
         Button(
-            self.root,
+            keyboard_frame,
             text="VOID",
             command=self.void_item,
             bg="#8B0000",
             fg="#FFFFFF",
-            highlightthickness=2,
-            relief="raised",
+            bordercolor="#333333",
             width=150,
             height=60
             ).grid(row=5, column=3)
         
         Button(
-            self.root,
+            keyboard_frame,
             text="VOID TXN",
             command=self.void_transaction_by_number,
             bg="#8B0000",
             fg="#FFFFFF",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=6, column=3)
 
         Button(
-            self.root,
+            keyboard_frame,
             text="X Report",
             width=150,
             height=60,
             bg="#FFEA00",
             fg="#000000",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            bordercolor="#333333",
             command=self.show_x_report
         ).grid(row=5,column=7)
 
         Button(
-            self.root,
+            keyboard_frame,
             text="Z Report",
             width=150,
             height=60,
             bg="#8B0000",
             fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            bordercolor="#333333",
             command=self.show_z_report
         ).grid(row=6,column=7)
 
         Button(
-            self.root,
+            keyboard_frame,
             text="Users",
             command=self.manage_users,
             bg="#800080",
             fg="#FFFFFF",
-            highlightthickness=2,
-            relief="raised",
+            bordercolor="#333333",
             width=150,
-            height=60,
-            padx=0, pady=0
+            height=60
         ).grid(row=4, column=7)
 
         Button(     #Department 001
-            self.root,
+            keyboard_frame,
             text=DEPT001,
             command=partial(self.department,"DEPT001"),
             bg="#50C878",
-            fg="#FFFFFF",
-            highlightthickness=2,
-            relief="raised",
-            padx=0, pady=0,
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=4, column=4, sticky="w")
     
         Button(     #Department2
-            self.root,
+            keyboard_frame,
             text=DEPT002,
             command=partial(self.department,"DEPT002"),
             bg="#50C878",
-            fg="#FFFFFF",
-            highlightthickness=2,
-            relief="raised",
-            padx=0, pady=0,
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=5, column=4, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT003,
             command=partial(self.department,"DEPT003"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=6, column=4, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT004,
             command=partial(self.department,"DEPT004"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=7, column=4, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT005,
             command=partial(self.department,"DEPT005"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=4, column=6, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT006,
             command=partial(self.department,"DEPT006"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=5, column=6, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT007,
             command=partial(self.department,"DEPT007"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=6, column=6, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text=DEPT008,
             command=partial(self.department,"DEPT008"),
             bg="#50C878",
-            fg="#FFFFFF",
-            padx=0, pady=0,
-            highlightthickness=2,
-            relief="raised",
+            fg="#000000",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=7, column=6, sticky="w")
 
         Button(
-            self.root,
+            keyboard_frame,
             text="Logout",
             command=self.logout,
             bg="#FFA500",
             fg="#000000",
-            highlightthickness=2,
-            relief="raised",
+            bordercolor="#333333",
             width=150,
             height=60
         ).grid(row=7, column=7)
