@@ -12,10 +12,11 @@ from CTkMessagebox import CTkMessagebox
 from escpos.printer import Usb  
 from barcode import Code128
 from barcode.writer import ImageWriter
-from PIL import Image
+#from PIL import Image
 import sys
+from decimal import Decimal, ROUND_HALF_UP
 
-#------------------------------------------------------------------
+#------------------------------------------------------------------------
 # Point of Sale System (POS)
 # Developed by Patrick Beeson
 # (C) 2026 Patrick Beeson
@@ -23,11 +24,15 @@ import sys
 # Date        Who          Reason
 # 2026-06-23  Patrick B.   Initial Release
 # 2026-06-23  Patrick B.   Added output to console.log
-#-----------------------------------------------------------------
+# 2026-06-25  Patrick B.   Updated complete() function to fix -0.00 error
+# 2026-06-25. Patrick Be.  Fixed error with Cutter not working on X report
+# 2026-06-25  Patrick B.   Added line to receipt if Transaction had been voided.
+# 2026-06-26. Patrick B.   Fixed issue with voided items not logging correctly.
+#------------------------------------------------------------------------
 
 
-sys.stdout = open("console.log", "a")
-sys.stderr = sys.stdout
+#sys.stdout = open("console.log", "a")
+#sys.stderr = sys.stdout
 
 
 # Set the following for your system.
@@ -35,9 +40,12 @@ DB_NAME = "pos.db"
 COMPANY_NAME = "The Kitchen"
 COMPANY_ADDRESS = "111 Main Street"
 COMPANY_ADDRESS2 = "Yourtown, NY 01111"
+SLOGAN="Thank You For eating with us!"
+# Logo must be in the directory and be a .png file
 COMPANY_LOGO="—Pngtree—kitchen store logo_21004253.png"
 COMPANY_TELEPHONE="802-999-9999"
 TAX_RATE = 0.06
+# Set what the departments are for your buisness.
 DEPT001="Food"
 DEPT002="Office"
 DEPT003="Printing"
@@ -47,9 +55,7 @@ DEPT006="Dept 006"
 DEPT007="Dept 007"
 DEPT008="Dept 008"
 
-#ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
-
-#Printer Code for RONGTA Thermal Printers
+#Printer Codes for RONGTA Thermal Printers
 # Font A
 FONTA="\x1b\x4d\x00"
 
@@ -118,7 +124,10 @@ def initialize_database():
         sale_date TIMESTAMP default current_timestamp,
         Department TEXT,
         price REAL NOT NULL,
-        z_id INTEGER 
+        z_id INTEGER,
+        voided INTEGER DEFAULT 0,
+        void_date TIMESTAMP,
+        voided_by TEXT
     )
     """)
 
@@ -139,6 +148,17 @@ def initialize_database():
         voided INTEGER DEFAULT 0,
         void_date TIMESTAMP,
         voided_by TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS voided_items (
+        sale_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sku TEXT,
+        description TEXT,
+        quantity INTEGER,
+        price REAL,
+        cashier TEXT
     )
     """)
 
@@ -277,11 +297,8 @@ def print_x_report(report_text):
     p.set(align='left', width=1, height=1)
     p.text(report_text)
     p.text("\n\n\n")
-
-    try:
-        p.cut()
-    except:
-        pass
+    
+    p._raw(b"\x1d\x56\x41\x03") 
 
     p.close()
 
@@ -354,6 +371,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT001"
         """)
     dept01Count, dept01Total = cur.fetchone()
@@ -364,6 +382,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT002"
         """)
     dept02Count, dept02Total = cur.fetchone()
@@ -374,6 +393,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT003"
         """)
     dept03Count, dept03Total = cur.fetchone()
@@ -384,6 +404,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT004"
         """)
     dept04Count, dept04Total = cur.fetchone()
@@ -394,6 +415,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT005"
         """)
     dept05Count, dept05Total = cur.fetchone()
@@ -404,6 +426,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT006"
         """)
     dept06Count, dept06Total = cur.fetchone()
@@ -414,6 +437,7 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT007"
         """)
     dept07Count, dept07Total = cur.fetchone()
@@ -424,12 +448,105 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
+        and not voided
         and Department = "DEPT008"
         """)
     dept08Count, dept08Total = cur.fetchone()
 
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT001"
+        """)
+    dept01VoidCount, dept01VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT002"
+        """)
+    dept02VoidCount, dept02VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT003"
+        """)
+    dept03VoidCount, dept03VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT004"
+        """)
+    dept04VoidCount, dept04VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT005"
+        """)
+    dept05VoidCount, dept05VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT006"
+        """)
+    dept06VoidCount, dept06VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT007"
+        """)
+    dept07VoidCount, dept07VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT008"
+        """)
+    dept08VoidCount, dept08VoidTotal = cur.fetchone()
+
+
+
     deptTotal = dept08Total+dept07Total+dept06Total+dept05Total+dept04Total+dept03Total+dept02Total+dept01Total
     deptCountTotal = dept08Count+dept07Count+dept06Count+dept05Count+dept04Count+dept03Count+dept02Count+dept01Count
+    deptVoidedTotal = dept08VoidTotal+dept07VoidTotal+dept06VoidTotal+dept05VoidTotal+dept04VoidTotal+dept03VoidTotal+dept02VoidTotal+dept01VoidTotal
+    deptVoidCountTotal = dept08VoidCount+dept07VoidCount+dept06VoidCount+dept05VoidCount+dept04VoidCount+dept03VoidCount+dept02VoidCount+dept01VoidCount
 
     report = []
     report.append(f"{DOUBLEWIDTHHEIGHT}")
@@ -459,6 +576,20 @@ def x_report():
     report.append(f"DEPT007 ({DEPT007:^11}): ({dept07Count:4}) ${dept07Total:8.2f}".rjust(42))
     report.append(f"DEPT008 ({DEPT008:^11}): ({dept08Count:4}) ${dept08Total:8.2f}".rjust(42))
     report.append(f"Department Totals ({deptCountTotal:4}) ${deptTotal:8.2f}".rjust(42))
+    report.append("")
+    report.append("-" * 42)
+    report.append("Voids by Department".center(42))
+    report.append("-" * 42)
+    report.append(f"     Department             Count    Amount   ")
+    report.append(f"DEPT001 ({DEPT001:^11}): ({dept01VoidCount:4}) ${dept01VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT002 ({DEPT002:^11}): ({dept02VoidCount:4}) ${dept02VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT003 ({DEPT003:^11}): ({dept03VoidCount:4}) ${dept03VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT004 ({DEPT004:^11}): ({dept04VoidCount:4}) ${dept04VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT005 ({DEPT005:^11}): ({dept05VoidCount:4}) ${dept05VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT006 ({DEPT006:^11}): ({dept06VoidCount:4}) ${dept06VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT007 ({DEPT007:^11}): ({dept07VoidCount:4}) ${dept07VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT008 ({DEPT008:^11}): ({dept08VoidCount:4}) ${dept08VoidTotal:8.2f}".rjust(42))
+    report.append(f"Department Totals ({deptVoidCountTotal:4}) ${deptVoidedTotal:8.2f}".rjust(42))
     report.append("")
     report.append("-" * 42)
     report.append("Payment Details".center(42))
@@ -628,8 +759,99 @@ def z_report():
         """)
     dept08Count, dept08Total = cur.fetchone()
 
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT001"
+        """)
+    dept01VoidCount, dept01VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT002"
+        """)
+    dept02VoidCount, dept02VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT003"
+        """)
+    dept03VoidCount, dept03VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT004"
+        """)
+    dept04VoidCount, dept04VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT005"
+        """)
+    dept05VoidCount, dept05VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT006"
+        """)
+    dept06VoidCount, dept06VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT007"
+        """)
+    dept07VoidCount, dept07VoidTotal = cur.fetchone()
+
+    cur.execute("""
+        SElECT
+            COUNT(*),
+            COALESCE(SUM(price),0)
+        FROM department
+        WHERE z_id is NULL
+        and voided
+        and Department = "DEPT008"
+        """)
+    dept08VoidCount, dept08VoidTotal = cur.fetchone()
+
+
     deptTotal = dept08Total+dept07Total+dept06Total+dept05Total+dept04Total+dept03Total+dept02Total+dept01Total
     deptCountTotal = dept08Count+dept07Count+dept06Count+dept05Count+dept04Count+dept03Count+dept02Count+dept01Count
+    deptVoidedTotal = dept08VoidTotal+dept07VoidTotal+dept06VoidTotal+dept05VoidTotal+dept04VoidTotal+dept03VoidTotal+dept02VoidTotal+dept01VoidTotal
+    deptVoidCountTotal = dept08VoidCount+dept07VoidCount+dept06VoidCount+dept05VoidCount+dept04VoidCount+dept03VoidCount+dept02VoidCount+dept01VoidCount
 
     cur.execute("""
     INSERT INTO z_reports
@@ -693,6 +915,20 @@ def z_report():
     report.append(f"DEPT007 ({DEPT007:^11}): ({dept07Count:4}) ${dept07Total:8.2f}".rjust(42))
     report.append(f"DEPT008 ({DEPT008:^11}): ({dept08Count:4}) ${dept08Total:8.2f}".rjust(42))
     report.append(f"Department Totals ({deptCountTotal:4}) ${deptTotal:8.2f}".rjust(42))
+    report.append("")
+    report.append("-" * 42)
+    report.append("Voids by Department".center(42))
+    report.append("-" * 42)
+    report.append(f"     Department             Count    Amount   ")
+    report.append(f"DEPT001 ({DEPT001:^11}): ({dept01VoidCount:4}) ${dept01VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT002 ({DEPT002:^11}): ({dept02VoidCount:4}) ${dept02VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT003 ({DEPT003:^11}): ({dept03VoidCount:4}) ${dept03VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT004 ({DEPT004:^11}): ({dept04VoidCount:4}) ${dept04VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT005 ({DEPT005:^11}): ({dept05VoidCount:4}) ${dept05VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT006 ({DEPT006:^11}): ({dept06VoidCount:4}) ${dept06VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT007 ({DEPT007:^11}): ({dept07VoidCount:4}) ${dept07VoidTotal:8.2f}".rjust(42))
+    report.append(f"DEPT008 ({DEPT008:^11}): ({dept08VoidCount:4}) ${dept08VoidTotal:8.2f}".rjust(42))
+    report.append(f"Department Totals ({deptVoidCountTotal:4}) ${deptVoidedTotal:8.2f}".rjust(42))
     report.append("")
     report.append("-" * 42)
     report.append("Payment Details".center(42))
@@ -865,6 +1101,15 @@ class POS:
 
         start_login(self.root)
 
+    def calculate_change(self, cash, total_due):
+        change = round(float(cash) - float(total_due), 2)
+
+        # Remove negative zero
+        if change == -0.0:
+            change = 0.0
+
+        return change
+
     def build_receipt_text(
         self,
         sale_id,
@@ -878,7 +1123,8 @@ class POS:
         payment_type,
         check_number=None,
         card_last4=None,
-        duplicate=False
+        duplicate=False,
+        voided=False
     ):
 
         current_date = datetime.now()
@@ -904,7 +1150,7 @@ class POS:
             price = item["price"]
 
             receipt.append(
-                f"{sku} {desc} ${price:8.2f}"
+                f"{sku} {desc}        ${price:8.2f}"
             )
 
         receipt.append("")
@@ -940,14 +1186,19 @@ class POS:
                 change
             )
         )
-
+        
+        if voided:
+            receipt.append("")
+            receipt.append("*** TRANSACTION WAS VOIDED ***")
+            receipt.append("")
+        
         receipt.append("")
         receipt.append(
             f"Sale Id #{sale_id:08d} cashier: {cashier_name}"
         )
 
         receipt.append("")
-        receipt.append("Thank You For Shopping!")
+        receipt.append(SLOGAN)
         receipt.append("")
 
         return "\n".join(receipt)
@@ -1167,6 +1418,14 @@ class POS:
     def return_key(self, event):
         self.add_item()
 
+    def update_totals(self):
+
+        subtotal, tax, total = self.calculate_totals()
+
+        self.total_label.config(
+            text=f"Subtotal: ${subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+        )
+
     def void_transaction_by_number(self):
 
         sale_id = simpledialog.askinteger(
@@ -1273,6 +1532,19 @@ class POS:
             sale_id
         ))
 
+        # Void in Departments
+        cur.execute("""
+        UPDATE department
+        SET voided = 1,
+            void_date = CURRENT_TIMESTAMP,
+            voided_by = ?
+        WHERE sale_id = ?
+        """,
+        (
+            manager_name,
+            sale_id
+        ))
+
         conn.commit()
         conn.close()
 
@@ -1323,6 +1595,28 @@ class POS:
         self.cart_list.delete(index)
 
         self.update_totals()
+
+        conn = sqlite3.connect(DB_NAME)
+        cur = conn.cursor()
+
+        cur.execute("""
+        INSERT INTO sale_items
+        (
+            sku,
+            description,
+            quantity,
+            price
+        )
+        VALUES (?,?,?,?)
+        """,
+        (
+            item["sku"],
+            item["description"],
+            item["quantity"],
+            item["price"],
+        ))
+
+        conn.close()
 
         self.sku_entry.focus_set()    
 
@@ -1385,7 +1679,7 @@ class POS:
             text="Subtotal: $0.00  Tax: $0.00  Total: $0.00",
             font=("Arial",18,"bold")
         )
-        self.total_label.grid(row=3,column=0,columnspan=4)
+        self.total_label.grid(row=3,column=1,columnspan=4)
 
         keypad = [
             ["7","8","9"],
@@ -1472,7 +1766,7 @@ class POS:
 
         Button(
             keyboard_frame,
-            text="Reprint",
+            text="Reprint Transaction",
             command=self.reprint_receipt,
             bg="#4682B4",
             fg="#FFFFFF",
@@ -1616,12 +1910,17 @@ class POS:
         # Set focus to sku_entry
         self.sku_entry.focus_set()
 
-    def update_totals(self):
-        tax = self.subtotal * TAX_RATE
-        total = self.subtotal + tax
-        self.total_label.config(
-            text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
-        )
+    def calculate_totals(self):
+        """
+        Calculate subtotal, tax, and total.
+        All values are rounded to two decimal places.
+        """
+
+        subtotal = round(self.subtotal, 2)
+        tax = round(subtotal * TAX_RATE, 2)
+        total = round(subtotal + tax, 2)
+
+        return subtotal, tax, total
 
     def key_press(self,key):
         if key == "C":
@@ -1934,6 +2233,13 @@ class POS:
 
         cur.execute("""
             SELECT *
+            FROM sales
+            WHERE sale_id = ?
+        """, (sale_id,))
+        voidedSale=cur.fetchone()
+
+        cur.execute("""
+            SELECT *
             FROM sale_items
             WHERE sale_id = ?
             ORDER BY sale_item_id
@@ -1964,7 +2270,8 @@ class POS:
             payment_type=sale["payment_type"],
             check_number=sale["check_number"],
             card_last4=sale["card_last4"],
-            duplicate=True
+            duplicate=True,
+            voided=voidedSale
         )
 
         print_report(
@@ -2014,8 +2321,7 @@ class POS:
         if not self.cart:
             return
 
-        tax = self.subtotal * TAX_RATE
-        total_due = self.subtotal + tax
+        subtotal, tax, total_due = self.calculate_totals()
 
         win = tk.Toplevel(self.root)
         win.title("Checkout")
@@ -2120,12 +2426,16 @@ class POS:
             try:
                 cash = float(cash_var.get())
 
+                change = self.calculate_change(cash, total_due)
+
                 change_lbl.config(
-                    text=f"Change: ${cash - total_due:.2f}"
+                    text=f"Change: ${change:.2f}"
                 )
 
             except ValueError:
-                pass
+                change_lbl.config(
+                    text="Change: $0.00"
+                )
 
         def complete():
 
@@ -2155,7 +2465,7 @@ class POS:
             if pay_type == "Cash":
 
                 try:
-                    cash = float(cash_var.get())
+                    cash = round(float(cash_var.get()), 2)
 
                 except ValueError:
                     messagebox.showerror(
@@ -2163,6 +2473,11 @@ class POS:
                         "Enter amount tendered."
                     )
                     return
+                
+                print(f"Subtotal={self.subtotal}")
+                print(f"Tax={tax}")
+                print(f"Total={total_due}")
+                print(f"Cash={cash}")
 
                 if cash < total_due:
                     messagebox.showerror(
@@ -2170,8 +2485,12 @@ class POS:
                         "Insufficient cash."
                     )
                     return
+                
+                change = self.calculate_change(cash, total_due)
 
-                change = cash - total_due
+                # Prevent displaying -0.00
+                if abs(change) < 0.005:
+                    change = 0.00
 
             elif pay_type == "Check":
 
@@ -2220,7 +2539,7 @@ class POS:
             VALUES (?,?,?,?,?,?,?,?,?)
             """,
             (
-                self.subtotal,
+                subtotal,
                 tax,
                 total_due,
                 cash,
@@ -2274,7 +2593,7 @@ class POS:
 
             self.printReceipt(
                 sale_id,
-                self.subtotal,
+                subtotal,
                 tax,
                 total_due,
                 cash,

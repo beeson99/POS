@@ -17,7 +17,8 @@
 |High|"WARNING: Appearance colors are either not supported with this tkinter or the colors doesn't exist on this Mac." Error| ✅ |PIB|
 |High|Void Transactions | ✅ |PIB|
 |Med|Scanner additions | | |	
-|High|QA Testing | | | 
-|High|Expand X and Z reports | |PIB|
-|Very High|Change not calculating correctly. "Change $-0.00"| |PIB|
+|High|QA Testing | ✅|PIB | 
+|High|Expand X and Z reports | ✅ |PIB| 
+|High|IF trans voided, show on re-print| ✅
+|Very High|Change not calculating correctly. "Change $-0.00"| ✅ |PIB|
 

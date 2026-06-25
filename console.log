@@ -5,3 +5,263 @@ The media.width.pixel field of the printer profile is not set. The center flag w
 00000091
 The media.width.pixel field of the printer profile is not set. The center flag will have no effect.
 The media.width.pixel field of the printer profile is not set. The center flag will have no effect.
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Could not set configuration: [Errno 60] Operation timed out
+Printer Error: [Errno None] Other error
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2178, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2194, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2194, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 848, in <lambda>
+    self.root.bind('<Return>', lambda event: self.add_item())
+                                             ^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1664, in add_item
+    self.update_totals()
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1623, in update_totals
+    text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+                                                                     ^^^^^
+NameError: name 'total' is not defined
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 848, in <lambda>
+    self.root.bind('<Return>', lambda event: self.add_item())
+                                             ^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1664, in add_item
+    self.update_totals()
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1623, in update_totals
+    text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+                                                                     ^^^^^
+NameError: name 'total' is not defined
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 848, in <lambda>
+    self.root.bind('<Return>', lambda event: self.add_item())
+                                             ^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1664, in add_item
+    self.update_totals()
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1623, in update_totals
+    text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+                                                                     ^^^^^
+NameError: name 'total' is not defined
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 848, in <lambda>
+    self.root.bind('<Return>', lambda event: self.add_item())
+                                             ^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1664, in add_item
+    self.update_totals()
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1623, in update_totals
+    text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+                                                                     ^^^^^
+NameError: name 'total' is not defined
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 848, in <lambda>
+    self.root.bind('<Return>', lambda event: self.add_item())
+                                             ^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1664, in add_item
+    self.update_totals()
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 1623, in update_totals
+    text=f"Subtotal: ${self.subtotal:.2f}  Tax: ${tax:.2f}  Total: ${total:.2f}"
+                                                                     ^^^^^
+NameError: name 'total' is not defined
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2123, in calc
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2186, in complete
+    change = self.calculate_change(cash, total_due)
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'POS' object has no attribute 'calculate_change'
