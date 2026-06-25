@@ -13,7 +13,7 @@ from escpos.printer import Usb
 from barcode import Code128
 from barcode.writer import ImageWriter
 from PIL import Image
-import logging
+import sys
 
 #------------------------------------------------------------------
 # Point of Sale System (POS)
@@ -22,8 +22,12 @@ import logging
 # Change Log:
 # Date        Who          Reason
 # 2026-06-23  Patrick B.   Initial Release
-#-------------------------------------------------------------------
+# 2026-06-23  Patrick B.   Added output to console.log
+#-----------------------------------------------------------------
 
+
+sys.stdout = open("console.log", "a")
+sys.stderr = sys.stdout
 
 
 # Set the following for your system.
@@ -860,6 +864,93 @@ class POS:
             widget.destroy()
 
         start_login(self.root)
+
+    def build_receipt_text(
+        self,
+        sale_id,
+        items,
+        subtotal,
+        tax,
+        total_due,
+        cash,
+        change,
+        cashier_name,
+        payment_type,
+        check_number=None,
+        card_last4=None,
+        duplicate=False
+    ):
+
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%m/%d/%Y %H:%M")
+
+        receipt = []
+
+        receipt.append(f"{CENTER}{BOLDON}{DOUBLEHEIGHT}{COMPANY_NAME}")
+        receipt.append(COMPANY_ADDRESS)
+        receipt.append(COMPANY_ADDRESS2)
+        receipt.append(f"{COMPANY_TELEPHONE}{NORMAL}")
+        receipt.append(formatted_date.center(42))
+        receipt.append("")
+
+        if duplicate:
+            receipt.append("*** DUPLICATE RECEIPT ***")
+            receipt.append("")
+
+        for item in items:
+
+            sku = item["sku"].ljust(13)
+            desc = item["description"].ljust(15)
+            price = item["price"]
+
+            receipt.append(
+                f"{sku} {desc} ${price:8.2f}"
+            )
+
+        receipt.append("")
+        receipt.append("                              ----------------")
+        receipt.append("{:>37} ${:8.2f}".format("Subtotal:", subtotal))
+        receipt.append("{:>37} ${:8.2f}".format("Tax:", tax))
+        receipt.append("{:>37} ${:8.2f}".format("Total Due:", total_due))
+
+        receipt.append("")
+        receipt.append(f"Payment Type: {payment_type}")
+
+        if payment_type == "Cash":
+            receipt.append(
+                "{:>37} ${:8.2f}".format(
+                    "Cash Tendered:",
+                    cash
+                )
+            )
+
+        elif payment_type == "Check":
+            receipt.append(
+                f"Check Number: {check_number}"
+            )
+
+        elif payment_type == "Credit Card":
+            receipt.append(
+                f"Card Ending: ****{card_last4}"
+            )
+
+        receipt.append(
+            "{:>37} ${:8.2f}".format(
+                "Change:",
+                change
+            )
+        )
+
+        receipt.append("")
+        receipt.append(
+            f"Sale Id #{sale_id:08d} cashier: {cashier_name}"
+        )
+
+        receipt.append("")
+        receipt.append("Thank You For Shopping!")
+        receipt.append("")
+
+        return "\n".join(receipt)
  
 
     def manage_users(self):
@@ -1381,6 +1472,17 @@ class POS:
 
         Button(
             keyboard_frame,
+            text="Reprint",
+            command=self.reprint_receipt,
+            bg="#4682B4",
+            fg="#FFFFFF",
+            bordercolor="#333333",
+            width=150,
+            height=60
+        ).grid(row=7, column=3)
+
+        Button(
+            keyboard_frame,
             text="X Report",
             width=150,
             height=60,
@@ -1797,6 +1899,83 @@ class POS:
         self.update_totals()
 
         self.sku_var.set("")
+        
+    def reprint_receipt(self):
+
+        sale_id = simpledialog.askinteger(
+            "Reprint Receipt",
+            "Enter Transaction Number:"
+        )
+
+        if sale_id is None:
+            return
+
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT *
+            FROM sales
+            WHERE sale_id = ?
+        """, (sale_id,))
+
+        sale = cur.fetchone()
+
+        if not sale:
+            conn.close()
+
+            messagebox.showerror(
+                "Error",
+                "Transaction not found."
+            )
+
+            return
+
+        cur.execute("""
+            SELECT *
+            FROM sale_items
+            WHERE sale_id = ?
+            ORDER BY sale_item_id
+        """, (sale_id,))
+
+        items = []
+
+        for row in cur.fetchall():
+
+            items.append({
+                "sku": row["sku"],
+                "description": row["description"],
+                "price": row["price"],
+                "quantity": row["quantity"]
+            })
+
+        conn.close()
+
+        receipt_text = self.build_receipt_text(
+            sale_id=sale["sale_id"],
+            items=items,
+            subtotal=sale["subtotal"],
+            tax=sale["tax"],
+            total_due=sale["total"],
+            cash=sale["cash_received"],
+            change=sale["change_given"],
+            cashier_name=sale["cashier"],
+            payment_type=sale["payment_type"],
+            check_number=sale["check_number"],
+            card_last4=sale["card_last4"],
+            duplicate=True
+        )
+
+        print_report(
+            receipt_text,
+            f"{sale_id:08d}"
+        )
+
+        messagebox.showinfo(
+            "Receipt Reprinted",
+            f"Transaction #{sale_id}"
+        )
     
     def printReceipt(
         self,
@@ -1811,65 +1990,24 @@ class POS:
         check_number=None,
         card_last4=None):
 
-        if not self.cart:
-            return
-        
-        logging.getLogger("media").setLevel(logging.ERROR)
-        current_date = datetime.now()
-        formatted_date = current_date.strftime("%m/%d/%Y %H:%M")
+        receipt_text = self.build_receipt_text(
+            sale_id=sale_id,
+            items=self.cart,
+            subtotal=subtotal,
+            tax=tax,
+            total_due=total_due,
+            cash=cash,
+            change=change,
+            cashier_name=name,
+            payment_type=payment_type,
+            check_number=check_number,
+            card_last4=card_last4
+        )
 
-        receipt_output=[]
-        
-        receipt_output.append(f"{CENTER}{BOLDON}{DOUBLEHEIGHT}{COMPANY_NAME}")
-        receipt_output.append(f"{COMPANY_ADDRESS}")
-        receipt_output.append(f"{COMPANY_ADDRESS2}{NORMAL}")
-        receipt_output.append(formatted_date.center(42))
-        receipt_output.append("")
-
-      
-
-        for item in self.cart:
-            sku=item["sku"]
-            lSku=sku.ljust(13)
-            description=item["description"]
-            lDescription=description.ljust(15)
-            price=item["price"]
-            printOutput=f"{lSku}  {lDescription}       ${price:8.2f}"
-            receipt_output.append(printOutput)
-            #p.text(printOutput)
-
-        receipt_output.append("                              ----------------")
-        receipt_output.append("{:>37} ${:8.2f}".format("Total:",subtotal))
-        receipt_output.append("{:>37} ${:8.2f}".format("Tax:",tax))    
-        receipt_output.append("{:>37} ${:8.2f}".format("Total Due:",total_due))
-
-        receipt_output.append(f"---Payment Type: {payment_type}---")
-        
-        if payment_type == "Cash":
-            receipt_output.append("{:>37} ${:8.2f}".format(
-                "Cash Tendered:", cash))
-
-        elif payment_type == "Check":
-            receipt_output.append(f"Check Number: {check_number}")
-
-        elif payment_type == "Credit Card":
-            receipt_output.append(f"Card Ending: ****{card_last4}")
-
-        receipt_output.append("{:>37} ${:8.2f}".format("Change:",change))
-        receipt_output.append("")
-        receipt_output.append(f"Sale Id #{sale_id:08d} cashier: {name}"  )
-        receipt_output.append("")
-        receipt_output.append("Thank You For Shopping!")
-        receipt_output.append("")
-        
-        barcodetext = f"{sale_id:08d}"
-
-        receipt_text = "\n".join(receipt_output)
-
-        try:
-            print_report(receipt_text,barcodetext)
-        except Exception as e:
-            print(f"Printer Error: {e}")
+        print_report(
+            receipt_text,
+            f"{sale_id:08d}"
+        )
 
     def checkout(self):
 
