@@ -4,12 +4,12 @@
 
 | Priority |Problem              |Status    |Assigned to| 
 |:---:|:---                | :---:     | :---: |      
-|Medium|Migrate to PostgreSQL from SQLite3| |PIB| 
+|Medium|Migrate to PostgreSQL from SQLite3|in progress |PIB| 
 |High|Duplicate Receipts| ✅|PIB
 |Medium|User name on Receipts| ✅ |PIB|
 |High|Logo on Receipt| ✅|PIB|
 |Low |Multiple instances of UI| ||	
-|Low|Change to web based| In progress |PIB|	
+|Low|Change to web based|||	
 |High|"The media.width.pixel field of the printer profile is not set. The center flag will have no effect." error | ✅ |PIB|
 |Med|Name on UI| ✅ |PIB|
 |High|Log out Button | ✅ |PIB|	
