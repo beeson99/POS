@@ -9,7 +9,7 @@
 |Medium|User name on Receipts| ✅ |PIB|
 |High|Logo on Receipt| ✅|PIB|
 |Low |Multiple instances of UI| ||	
-|Low|Change to web based| ||	
+|Low|Change to web based| In progress |PIB|	
 |High|"The media.width.pixel field of the printer profile is not set. The center flag will have no effect." error | ✅ |PIB|
 |Med|Name on UI| ✅ |PIB|
 |High|Log out Button | ✅ |PIB|	
