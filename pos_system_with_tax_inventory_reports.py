@@ -12,9 +12,12 @@ from CTkMessagebox import CTkMessagebox
 from escpos.printer import Usb  
 from barcode import Code128
 from barcode.writer import ImageWriter
-#from PIL import Image
+from PIL import Image
+from escpos.exceptions import USBNotFoundError
 import sys
 from decimal import Decimal, ROUND_HALF_UP
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 #------------------------------------------------------------------------
 # Point of Sale System (POS)
@@ -30,10 +33,8 @@ from decimal import Decimal, ROUND_HALF_UP
 # 2026-06-26. Patrick B.   Fixed issue with voided items not logging correctly.
 #------------------------------------------------------------------------
 
-
 #sys.stdout = open("console.log", "a")
 #sys.stderr = sys.stdout
-
 
 # Set the following for your system.
 DB_NAME = "pos.db"
@@ -87,7 +88,9 @@ NORMAL="\x1d\x21\x00"
 CENTER="\x1b\x61\x01"
 
 def initialize_database():
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
     cur = conn.cursor()
 
     cur.execute("""
@@ -206,14 +209,16 @@ def initialize_database():
 
 def validate_login(username, password):
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
     cur = conn.cursor()
 
     cur.execute("""
     SELECT role
     FROM users
-    WHERE username = ?
-      AND password = ?
+    WHERE username = %s
+      AND password = %s
     """, (username, password))
 
     row = cur.fetchone()
@@ -223,10 +228,12 @@ def validate_login(username, password):
     return row
 
 def get_product(sku):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
+    #conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    cur.execute("SELECT * FROM products WHERE sku=? AND active=1", (sku,))
+    cur.execute("SELECT * FROM products WHERE sku=%s AND active=1", (sku,))
     row = cur.fetchone()
     conn.close()
     return row
@@ -248,47 +255,59 @@ def print_report(report_text,barcodetext):
             "text_distance": 1
         }
         )
+    try:
+        p = Usb(0x0fe6, 0x811e)
+        p.set(align='left', width=1, height=1)
 
-    p = Usb(0x0fe6, 0x811e)
-    p.set(align='left', width=1, height=1)
+        # Image to top
+        logo = Image.open(COMPANY_LOGO)
 
-    # Image to top
-    logo = Image.open(COMPANY_LOGO)
+        max_width = 576
 
-    max_width = 576
+        if logo.width > max_width:
+            ratio = max_width / logo.width
 
-    if logo.width > max_width:
-        ratio = max_width / logo.width
+        logo = logo.resize(
+            (
+                int(logo.width * ratio),
+                int(logo.height * ratio)
+            ),
+            Image.LANCZOS
+        )
 
-    logo = logo.resize(
-        (
-            int(logo.width * ratio),
-            int(logo.height * ratio)
-        ),
-        Image.LANCZOS
+        logo.save("logo_print.png")
+        
+        # Replace with your Rongta USB Vendor ID and Product ID
+        print (barcodetext)
+        if barcodetext is not None:
+            try:
+                #p._raw(b'\x1b\x61\x01')   # center
+                p.image("logo_print.png")
+                #p._raw(b'\x1b\x61\x00')   # left
+            except Exception as e:
+                print(f"Logo Error: {e}")
+            p.text(report_text)
+            #p._raw(b'\x1b\x61\x01')
+            p.image("barcode.png",center=True)
+            p.text("\n\n\n")
+
+            try:
+                p.cut()
+            except:
+                pass
+
+    except USBNotFoundError:
+        messagebox.showwarning(
+        "Printer Offline",
+        "Receipt printer is not connected.\n"
+        "The sale has been completed but the receipt could not be printed."
     )
 
-    logo.save("logo_print.png")
-    
-    # Replace with your Rongta USB Vendor ID and Product ID
-    print (barcodetext)
-    if barcodetext is not None:
-        try:
-            #p._raw(b'\x1b\x61\x01')   # center
-            p.image("logo_print.png")
-            #p._raw(b'\x1b\x61\x00')   # left
-        except Exception as e:
-            print(f"Logo Error: {e}")
-        p.text(report_text)
-        #p._raw(b'\x1b\x61\x01')
-        p.image("barcode.png",center=True)
-        p.text("\n\n\n")
-
-    try:
-        p.cut()
-    except:
-        pass
-
+    except Exception as e:
+        messagebox.showerror(
+        "Printer Error",
+            str(e)
+        )
     p.close()
 
 def print_x_report(report_text):
@@ -307,7 +326,9 @@ def x_report():
     now = datetime.now()
     formatted_now = now.strftime("%m/%d/%Y %H:%M")
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
     cur = conn.cursor()
 
     cur.execute("""
@@ -618,7 +639,9 @@ def z_report():
     now = datetime.now()
     formatted_now = now.strftime("%m/%d/%Y %H:%M")
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
     cur = conn.cursor()
 
     cur.execute("""
@@ -860,7 +883,8 @@ def z_report():
         sales_total,
         tax_total
     )
-    VALUES (?,?,?)
+    VALUES (%s,%s,%s)
+    RETURNING z_id
     """,
     (
         txns,
@@ -868,11 +892,11 @@ def z_report():
         tax
     ))
 
-    z_id = cur.lastrowid
+    z_id = cur.fetchone()[0]
 
     cur.execute("""
         UPDATE sales
-        SET z_id = ?
+        SET z_id = %s
         WHERE z_id IS NULL
     """,(z_id,))
 
@@ -880,7 +904,7 @@ def z_report():
 
     cur.execute("""
         UPDATE department
-        SET z_id = ?
+        SET z_id = %s
         WHERE z_id IS NULL
     """,(z_id,))
     
@@ -948,8 +972,6 @@ def z_report():
         print(f"Printer Error: {e}")
 
     return report_text   
-
-
 
 #------------------------------------------------------
 # set up ecspos printer settings
@@ -1237,7 +1259,9 @@ class POS:
 
             user_list.delete(0, tk.END)
 
-            conn = sqlite3.connect(DB_NAME)
+            conn = psycopg2.connect(
+                "host=localhost port=5432 dbname=posdb user=pos"
+            )
             cur = conn.cursor()
 
             cur.execute("""
@@ -1320,7 +1344,9 @@ class POS:
 
             try:
 
-                conn = sqlite3.connect(DB_NAME)
+                conn = psycopg2.connect(
+                    "host=localhost port=5432 dbname=posdb user=pos"
+                )
                 cur = conn.cursor()
 
                 cur.execute("""
@@ -1331,7 +1357,7 @@ class POS:
                     name,
                     role
                 )
-                VALUES (?,?,?,?)
+                VALUES (%s,%s,%s,%s)
                 """,
                 (
                     username,
@@ -1384,12 +1410,14 @@ class POS:
             ):
                 return
 
-            conn = sqlite3.connect(DB_NAME)
+            conn = psycopg2.connect(
+                "host=localhost port=5432 dbname=posdb user=pos"
+            )
             cur = conn.cursor()
 
             cur.execute("""
                 DELETE FROM users
-                WHERE username = ?
+                WHERE username = %s
             """, (username,))
 
             conn.commit()
@@ -1445,13 +1473,15 @@ class POS:
         if not password:
             return
 
-        conn = sqlite3.connect(DB_NAME)
+        conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
         cur = conn.cursor()
 
         cur.execute("""
         SELECT username
             FROM users
-            WHERE password = ?
+            WHERE password = %s
             AND role = 'manager'
         """, (password,))
 
@@ -1470,7 +1500,7 @@ class POS:
         cur.execute("""
         SELECT total, voided
         FROM sales
-        WHERE sale_id = ?
+        WHERE sale_id = %s
         """, (sale_id,))
 
         sale = cur.fetchone()
@@ -1516,16 +1546,16 @@ class POS:
                 cur.execute("""
                 UPDATE products
                 SET quantity_on_hand =
-                    quantity_on_hand + ?
-                WHERE sku = ?
+                    quantity_on_hand + %s
+                WHERE sku = %s
                 """, (qty, sku))
 
         cur.execute("""
         UPDATE sales
         SET voided = 1,
             void_date = CURRENT_TIMESTAMP,
-            voided_by = ?
-        WHERE sale_id = ?
+            voided_by = %s
+        WHERE sale_id = %s
         """,
         (
             manager_name,
@@ -1537,8 +1567,8 @@ class POS:
         UPDATE department
         SET voided = 1,
             void_date = CURRENT_TIMESTAMP,
-            voided_by = ?
-        WHERE sale_id = ?
+            voided_by = %s
+        WHERE sale_id = %s
         """,
         (
             manager_name,
@@ -1596,41 +1626,21 @@ class POS:
 
         self.update_totals()
 
-        conn = sqlite3.connect(DB_NAME)
-        cur = conn.cursor()
-
-        cur.execute("""
-        INSERT INTO sale_items
-        (
-            sku,
-            description,
-            quantity,
-            price
-        )
-        VALUES (?,?,?,?)
-        """,
-        (
-            item["sku"],
-            item["description"],
-            item["quantity"],
-            item["price"],
-        ))
-
-        conn.close()
-
         self.sku_entry.focus_set()    
 
     def build_ui(self):
 
         username = self.user['username']
 
-        conn = sqlite3.connect(DB_NAME)
+        conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
         cur = conn.cursor()
 
         cur.execute("""
             SELECT name
             FROM users
-            WHERE username = ?
+            WHERE username = %s
         """, (username,))
 
         row = cur.fetchone()
@@ -1943,23 +1953,23 @@ class POS:
         #    return
 
         self.cart.append({
-            "sku": product["sku"],
-            "description": product["description"],
-            "price": product["price"],
-            "department": product["department"],
+            "sku": product[1],
+            "description": product[2],
+            "price": product[4],
+            "department": product[3],
             "quantity": 1
         })
 
-        self.writeDepartment(product["department"],product["price"])
+        self.writeDepartment(product[3],product[4]) #department, price
 
-        fSku = product['sku'].ljust(13)
-        fDescription = product['description'].ljust(15)
+        fSku = product[1].ljust(13) #sku
+        fDescription = product[2].ljust(15) #description
         self.cart_list.insert(
             tk.END,
-            f"{fSku} {fDescription} ${product['price']:8.2f}"
+            f"{fSku} {fDescription} ${product[4]:8.2f}" #price
         )
 
-        self.subtotal += product["price"]
+        self.subtotal += product[4] #price
         self.update_totals()
         self.sku_var.set("")
         self.sku_entry.focus_set()
@@ -1986,14 +1996,16 @@ class POS:
         if password is None:
             return
 
-        conn = sqlite3.connect(DB_NAME)
+        conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
         cur = conn.cursor()
 
         cur.execute("""
         SELECT role
         FROM users
         WHERE username = 'admin'
-        AND password = ?
+        AND password = %s
         """, (password,))
 
         row = cur.fetchone()
@@ -2021,7 +2033,9 @@ class POS:
         )
 
     def writeDepartment(self,dept,price):
-        conn = sqlite3.connect(DB_NAME)
+        conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
         cur = conn.cursor()
 
         
@@ -2032,7 +2046,7 @@ class POS:
             price,
             z_id
         )
-        VALUES (?,?,?)
+        VALUES (%s,%s,%s)
         """,
         (
             dept,
@@ -2209,14 +2223,16 @@ class POS:
         if sale_id is None:
             return
 
-        conn = sqlite3.connect(DB_NAME)
-        conn.row_factory = sqlite3.Row
+        conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
+        #conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
         cur.execute("""
             SELECT *
             FROM sales
-            WHERE sale_id = ?
+            WHERE sale_id = %
         """, (sale_id,))
 
         sale = cur.fetchone()
@@ -2234,14 +2250,14 @@ class POS:
         cur.execute("""
             SELECT *
             FROM sales
-            WHERE sale_id = ?
+            WHERE sale_id = %s
         """, (sale_id,))
         voidedSale=cur.fetchone()
 
         cur.execute("""
             SELECT *
             FROM sale_items
-            WHERE sale_id = ?
+            WHERE sale_id = %s
             ORDER BY sale_item_id
         """, (sale_id,))
 
@@ -2441,13 +2457,15 @@ class POS:
 
             pay_type = payment_type.get()
 
-            conn = sqlite3.connect(DB_NAME)
+            conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
             cur = conn.cursor()
 
             cur.execute("""
                 SELECT name
                 FROM users
-                WHERE username = ?
+                WHERE username = %s
             """, (self.user["username"],))
 
             row = cur.fetchone()
@@ -2518,7 +2536,9 @@ class POS:
 
                 cash = total_due
 
-            conn = sqlite3.connect(DB_NAME)
+            conn = psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
             cur = conn.cursor()
 
             user = self.user["username"]
@@ -2536,7 +2556,8 @@ class POS:
                 check_number,
                 card_last4
             )
-            VALUES (?,?,?,?,?,?,?,?,?)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            RETURNING sale_id
             """,
             (
                 subtotal,
@@ -2550,7 +2571,7 @@ class POS:
                 card_last4
             ))
 
-            sale_id = cur.lastrowid
+            sale_id = cur.fetchone()[0]
 
             for item in self.cart:
 
@@ -2564,7 +2585,7 @@ class POS:
                     price,
                     cashier
                 )
-                VALUES (?,?,?,?,?,?)
+                VALUES (%s,%s,%s,%s,%s,%s)
                 """,
                 (
                     sale_id,
@@ -2580,8 +2601,8 @@ class POS:
                     cur.execute("""
                     UPDATE products
                     SET quantity_on_hand =
-                        quantity_on_hand - ?
-                    WHERE sku = ?
+                        quantity_on_hand - %s
+                    WHERE sku = %s
                     """,
                     (
                         item["quantity"],
@@ -2647,7 +2668,7 @@ class POS:
 
 if __name__ == "__main__":
 
-    initialize_database()
+    #initialize_database()
 
     root = ctk.CTk()
     root.withdraw()

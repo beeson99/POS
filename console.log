@@ -265,3 +265,131 @@ Traceback (most recent call last):
     change = self.calculate_change(cash, total_due)
              ^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'POS' object has no attribute 'calculate_change'
+WARNING: Appearance colors are either notsupported with this tkinter or the colors doesn't exist on this Mac.
+Subtotal=4.25
+Tax=0.26
+Total=4.51
+Cash=4.51
+Could not set configuration: [Errno 60] Operation timed out
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 241, in get_interface_and_endpoint
+    return self._ep_info[endpoint_address]
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 1
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2626, in <lambda>
+    lambda event: complete()
+                  ^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2592, in complete
+    self.printReceipt(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2312, in printReceipt
+    print_report(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 251, in print_report
+    p.set(align='left', width=1, height=1)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/escpos.py", line 597, in set
+    self._raw(TXT_NORMAL)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/printer.py", line 99, in _raw
+    self.device.write(self.out_ep, msg, self.timeout)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 1000, in write
+    intf, ep = self._ctx.setup_request(self, endpoint)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 113, in wrapper
+    return f(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 233, in setup_request
+    intf, ep = self.get_interface_and_endpoint(device, endpoint_address)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 113, in wrapper
+    return f(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 243, in get_interface_and_endpoint
+    for intf in self.get_active_configuration(device):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 113, in wrapper
+    return f(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 257, in get_active_configuration
+    cfg = util.find_descriptor(
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/util.py", line 188, in find_descriptor
+    return next(desc_iter(**args))
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/util.py", line 179, in desc_iter
+    for d in desc:
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 1151, in __iter__
+    yield Configuration(self, i)
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 613, in __init__
+    desc = backend.get_configuration_descriptor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 777, in get_configuration_descriptor
+    _check(self.lib.libusb_get_config_descriptor(
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 604, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBError: [Errno None] Other error
+Subtotal=4.25
+Tax=0.26
+Total=4.51
+Cash=4.51
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2592, in complete
+    self.printReceipt(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2312, in printReceipt
+    print_report(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 250, in print_report
+    p = Usb(0x0fe6, 0x811e)
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/printer.py", line 52, in __init__
+    self.open(usb_args)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/printer.py", line 74, in open
+    check_driver = self.device.is_kernel_driver_active(0)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 1119, in is_kernel_driver_active
+    return self._ctx.backend.is_kernel_driver_active(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 919, in is_kernel_driver_active
+    return bool(_check(self.lib.libusb_kernel_driver_active(dev_handle.handle,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 604, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBError: [Errno 2] Entity not found
+Subtotal=4.25
+Tax=0.26
+Total=4.51
+Cash=6.0
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2592, in complete
+    self.printReceipt(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 2312, in printReceipt
+    print_report(
+  File "/Users/pbeeson/python/register/pos_system_with_tax_inventory_reports.py", line 250, in print_report
+    p = Usb(0x0fe6, 0x811e)
+        ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/printer.py", line 52, in __init__
+    self.open(usb_args)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/escpos/printer.py", line 74, in open
+    check_driver = self.device.is_kernel_driver_active(0)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/core.py", line 1119, in is_kernel_driver_active
+    return self._ctx.backend.is_kernel_driver_active(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 919, in is_kernel_driver_active
+    return bool(_check(self.lib.libusb_kernel_driver_active(dev_handle.handle,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/usb/backend/libusb1.py", line 604, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])

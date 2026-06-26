@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
+import psycopg2
 
 DB_NAME = "pos.db"
 
@@ -16,7 +17,10 @@ class ProductMaintenance:
         self.load_products()
 
     def get_connection(self):
-        return sqlite3.connect(DB_NAME)
+       # return sqlite3.connect(DB_NAME)
+        return psycopg2.connect(
+            "host=localhost port=5432 dbname=posdb user=pos"
+        )
 
     def create_widgets(self):
 
@@ -175,7 +179,7 @@ class ProductMaintenance:
                     quantity_on_hand,
                     active
                 )
-                VALUES (?,?,?,?,?,?)
+                VALUES (%s,%s,%s,%s,%s,%s)
             """,
             (
                 self.sku.get(),
@@ -211,13 +215,13 @@ class ProductMaintenance:
             cur.execute("""
                 UPDATE products
                 SET
-                    sku=?,
-                    description=?,
-                    department=?,
-                    price=?,
-                    quantity_on_hand=?,
-                    active=?
-                WHERE id=?
+                    sku=%s,
+                    description=%s,
+                    department=%s,
+                    price=%s,
+                    quantity_on_hand=%s,
+                    active=%s
+                WHERE id=%s
             """,
             (
                 self.sku.get(),
@@ -256,7 +260,7 @@ class ProductMaintenance:
         cur = conn.cursor()
 
         cur.execute(
-            "DELETE FROM products WHERE id=?",
+            "DELETE FROM products WHERE id=%s",
             (product_id,)
         )
 
@@ -287,8 +291,8 @@ class ProductMaintenance:
                 active
             FROM products
             WHERE
-                sku LIKE ?
-                OR description LIKE ?
+                sku LIKE %s
+                OR description LIKE %s
             ORDER BY description
         """,
         (
