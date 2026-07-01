@@ -31,6 +31,8 @@ from psycopg2.extras import RealDictCursor
 # 2026-06-25. Patrick Be.  Fixed error with Cutter not working on X report
 # 2026-06-25  Patrick B.   Added line to receipt if Transaction had been voided.
 # 2026-06-26. Patrick B.   Fixed issue with voided items not logging correctly.
+# 2026-06-28. Patrick Be.  Fixed issue with Receipt columns not lining up.
+# 2026-07-01. Patrick B.   Fixed issue with Department not showing correctly on screen.
 #------------------------------------------------------------------------
 
 #sys.stdout = open("console.log", "a")
@@ -392,8 +394,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT001"
+        and voided = 0
+        and Department = 'DEPT001'
         """)
     dept01Count, dept01Total = cur.fetchone()
 
@@ -403,8 +405,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT002"
+        and voided = 0
+        and Department = 'DEPT002'
         """)
     dept02Count, dept02Total = cur.fetchone()
 
@@ -414,8 +416,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT003"
+        and voided = 0
+        and Department = 'DEPT003'
         """)
     dept03Count, dept03Total = cur.fetchone()
 
@@ -425,8 +427,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT004"
+        and voided = 0
+        and Department = 'DEPT004'
         """)
     dept04Count, dept04Total = cur.fetchone()
 
@@ -436,8 +438,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT005"
+        and voided = 0
+        and Department = 'DEPT005'
         """)
     dept05Count, dept05Total = cur.fetchone()
 
@@ -447,8 +449,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT006"
+        and voided = 0
+        and Department = 'DEPT006'
         """)
     dept06Count, dept06Total = cur.fetchone()
 
@@ -458,8 +460,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT007"
+        and voided = 0
+        and Department = 'DEPT007'
         """)
     dept07Count, dept07Total = cur.fetchone()
 
@@ -469,8 +471,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and not voided
-        and Department = "DEPT008"
+        and voided = 0
+        and Department = 'DEPT008'
         """)
     dept08Count, dept08Total = cur.fetchone()
 
@@ -480,8 +482,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT001"
+        and voided > 0
+        and Department = 'DEPT001'
         """)
     dept01VoidCount, dept01VoidTotal = cur.fetchone()
 
@@ -491,8 +493,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT002"
+        and voided > 0
+        and Department = 'DEPT002'
         """)
     dept02VoidCount, dept02VoidTotal = cur.fetchone()
 
@@ -502,8 +504,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT003"
+        and voided > 0
+        and Department = 'DEPT003'
         """)
     dept03VoidCount, dept03VoidTotal = cur.fetchone()
 
@@ -513,8 +515,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT004"
+        and voided > 0
+        and Department = 'DEPT004'
         """)
     dept04VoidCount, dept04VoidTotal = cur.fetchone()
 
@@ -524,8 +526,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT005"
+        and voided > 0
+        and Department = 'DEPT005'
         """)
     dept05VoidCount, dept05VoidTotal = cur.fetchone()
 
@@ -535,8 +537,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT006"
+        and voided > 0
+        and Department = 'DEPT006'
         """)
     dept06VoidCount, dept06VoidTotal = cur.fetchone()
 
@@ -546,8 +548,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT007"
+        and voided > 0
+        and Department = 'DEPT007'
         """)
     dept07VoidCount, dept07VoidTotal = cur.fetchone()
 
@@ -557,8 +559,8 @@ def x_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT008"
+        and voided > 0
+        and Department = 'DEPT008'
         """)
     dept08VoidCount, dept08VoidTotal = cur.fetchone()
 
@@ -708,7 +710,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT001"
+        and Department = 'DEPT001'
         """)
     dept01Count, dept01Total = cur.fetchone()
 
@@ -718,7 +720,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT002"
+        and Department = 'DEPT002'
         """)
     dept02Count, dept02Total = cur.fetchone()
 
@@ -728,7 +730,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT003"
+        and Department = 'DEPT003'
         """)
     dept03Count, dept03Total = cur.fetchone()
 
@@ -738,7 +740,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT004"
+        and Department = 'DEPT004'
         """)
     dept04Count, dept04Total = cur.fetchone()
 
@@ -748,7 +750,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT005"
+        and Department = 'DEPT005'
         """)
     dept05Count, dept05Total = cur.fetchone()
 
@@ -758,7 +760,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT006"
+        and Department = 'DEPT006'
         """)
     dept06Count, dept06Total = cur.fetchone()
 
@@ -768,7 +770,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT007"
+        and Department = 'DEPT007'
         """)
     dept07Count, dept07Total = cur.fetchone()
 
@@ -778,7 +780,7 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and Department = "DEPT008"
+        and Department = 'DEPT008'
         """)
     dept08Count, dept08Total = cur.fetchone()
 
@@ -788,8 +790,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT001"
+        and voided > 0
+        and Department = 'DEPT001'
         """)
     dept01VoidCount, dept01VoidTotal = cur.fetchone()
 
@@ -799,8 +801,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT002"
+        and voided > 0
+        and Department = 'DEPT002'
         """)
     dept02VoidCount, dept02VoidTotal = cur.fetchone()
 
@@ -810,8 +812,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT003"
+        and voided > 0
+        and Department = 'DEPT003'
         """)
     dept03VoidCount, dept03VoidTotal = cur.fetchone()
 
@@ -821,8 +823,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT004"
+        and voided > 0
+        and Department = 'DEPT004'
         """)
     dept04VoidCount, dept04VoidTotal = cur.fetchone()
 
@@ -832,8 +834,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT005"
+        and voided > 0
+        and Department = 'DEPT005'
         """)
     dept05VoidCount, dept05VoidTotal = cur.fetchone()
 
@@ -843,8 +845,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT006"
+        and voided > 0
+        and Department = 'DEPT006'
         """)
     dept06VoidCount, dept06VoidTotal = cur.fetchone()
 
@@ -854,8 +856,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT007"
+        and voided > 0
+        and Department = 'DEPT007'
         """)
     dept07VoidCount, dept07VoidTotal = cur.fetchone()
 
@@ -865,8 +867,8 @@ def z_report():
             COALESCE(SUM(price),0)
         FROM department
         WHERE z_id is NULL
-        and voided
-        and Department = "DEPT008"
+        and voided > 0
+        and Department = 'DEPT008'
         """)
     dept08VoidCount, dept08VoidTotal = cur.fetchone()
 
@@ -1167,16 +1169,16 @@ class POS:
 
         for item in items:
 
-            sku = item["sku"].ljust(13)
-            desc = item["description"].ljust(15)
+            sku = item["sku"]
+            desc = item["description"]
             price = item["price"]
 
             receipt.append(
-                f"{sku} {desc}        ${price:8.2f}"
+                f"{sku:13} {desc:<20}   ${price:8.2f}"
             )
 
-        receipt.append("")
-        receipt.append("                              ----------------")
+        #receipt.append("")
+        receipt.append("                              -----------------")
         receipt.append("{:>37} ${:8.2f}".format("Subtotal:", subtotal))
         receipt.append("{:>37} ${:8.2f}".format("Tax:", tax))
         receipt.append("{:>37} ${:8.2f}".format("Total Due:", total_due))
@@ -1534,7 +1536,7 @@ class POS:
         cur.execute("""
         SELECT sku, quantity
         FROM sale_items
-        WHERE sale_id = ?
+        WHERE sale_id = %s
         """, (sale_id,))
 
         items = cur.fetchall()
@@ -1960,13 +1962,15 @@ class POS:
             "quantity": 1
         })
 
-        self.writeDepartment(product[3],product[4]) #department, price
+        #self.writeDepartment(product[3],product[4]) #department, price
+        # Moving this to checkOUt
 
         fSku = product[1].ljust(13) #sku
         fDescription = product[2].ljust(15) #description
         self.cart_list.insert(
             tk.END,
-            f"{fSku} {fDescription} ${product[4]:8.2f}" #price
+           # f"{fSku} {fDescription} ${product[4]:8.2f}" #price
+            f"{fSku:13} {fDescription:<20}   ${product[4]:8.2f}"
         )
 
         self.subtotal += product[4] #price
@@ -2032,7 +2036,7 @@ class POS:
             report
         )
 
-    def writeDepartment(self,dept,price):
+    def writeDepartment(self,dept,price,sale_id):
         conn = psycopg2.connect(
             "host=localhost port=5432 dbname=posdb user=pos"
         )
@@ -2042,13 +2046,15 @@ class POS:
         cur.execute("""
         INSERT INTO department
         (
+            sale_id,
             Department,
             price,
             z_id
         )
-        VALUES (%s,%s,%s)
+        VALUES (%s,%s,%s,%s)
         """,
         (
+            sale_id,
             dept,
             price,
             None
@@ -2081,12 +2087,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT002":
                 cname=DEPT002
@@ -2097,12 +2104,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT003":
                 cname=DEPT003
@@ -2113,12 +2121,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT004":
                 cname=DEPT004
@@ -2129,12 +2138,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT005":
                 cname=DEPT005
@@ -2145,12 +2155,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT006":
                 cname=DEPT006
@@ -2161,12 +2172,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT007":
                 cname=DEPT007
@@ -2177,12 +2189,13 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
+                #self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
             case "DEPT008":
                 cname=DEPT008
@@ -2193,12 +2206,12 @@ class POS:
                     "price": price,
                     "quantity": 1
                 })
-                self.writeDepartment(cSku,price)
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
-                f"{fSku} {fname} ${price:8.2f}"
+                #f"{fSku} {fname} ${price:8.2f}"
+                f"{fSku:13} {fname:<20}   ${price:8.2f}"
                 )
 
                 self.sku_entry.focus_set()
@@ -2232,7 +2245,7 @@ class POS:
         cur.execute("""
             SELECT *
             FROM sales
-            WHERE sale_id = %
+            WHERE sale_id = %s
         """, (sale_id,))
 
         sale = cur.fetchone()
@@ -2492,10 +2505,10 @@ class POS:
                     )
                     return
                 
-                print(f"Subtotal={self.subtotal}")
-                print(f"Tax={tax}")
-                print(f"Total={total_due}")
-                print(f"Cash={cash}")
+                #print(f"Subtotal={self.subtotal}")
+                #print(f"Tax={tax}")
+                #print(f"Total={total_due}")
+                #print(f"Cash={cash}")
 
                 if cash < total_due:
                     messagebox.showerror(
@@ -2540,38 +2553,43 @@ class POS:
             "host=localhost port=5432 dbname=posdb user=pos"
         )
             cur = conn.cursor()
-
             user = self.user["username"]
 
-            cur.execute("""
-            INSERT INTO sales
-            (
-                subtotal,
-                tax,
-                total,
-                cash_received,
-                change_given,
-                cashier,
-                payment_type,
-                check_number,
-                card_last4
-            )
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            RETURNING sale_id
-            """,
-            (
-                subtotal,
-                tax,
-                total_due,
-                cash,
-                change,
-                user,
-                pay_type,
-                check_number,
-                card_last4
-            ))
+            try:
+                cur.execute("""
+                INSERT INTO sales
+                (
+                    subtotal,
+                    tax,
+                    total,
+                    cash_received,
+                    change_given,
+                    cashier,
+                    payment_type,
+                    check_number,
+                    card_last4
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING sale_id
+                """,
+                (
+                    subtotal,
+                    tax,
+                    total_due,
+                    cash,
+                    change,
+                    user,
+                    pay_type,
+                    check_number,
+                    card_last4
+                ))
 
-            sale_id = cur.fetchone()[0]
+                sale_id = cur.fetchone()[0]
+                #print("SALE ID =", sale_id)
+
+            except Exception as e:
+                print("SALES INSERT ERROR:", e)
+                raise
 
             for item in self.cart:
 
@@ -2608,6 +2626,18 @@ class POS:
                         item["quantity"],
                         item["sku"]
                     ))
+
+
+                dept = item["sku"]
+                if not item["sku"].startswith("DEPT"):
+                    cur.execute("""
+                    SELECT department
+                    FROM products
+                    WHERE sku = %s
+                    """, (item["sku"],))
+                    dept = cur.fetchone()[0]
+                #print("Dept==",dept,sale_id)
+                self.writeDepartment(dept, item["price"], sale_id)
 
             conn.commit()
             conn.close()
