@@ -19,6 +19,6 @@
 |Med|Scanner additions | | |	
 |High|QA Testing | ✅|PIB | 
 |High|Expand X and Z reports | ✅ |PIB| 
-|High|IF trans voided, show on re-print| ✅
+|High|IF trans voided, show on re-print| ✅| PIB|
 |Very High|Change not calculating correctly. "Change $-0.00"| ✅ |PIB|
 

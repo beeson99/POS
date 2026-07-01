@@ -43,7 +43,7 @@ DB_NAME = "pos.db"
 COMPANY_NAME = "The Kitchen"
 COMPANY_ADDRESS = "111 Main Street"
 COMPANY_ADDRESS2 = "Yourtown, NY 01111"
-SLOGAN="Thank You For eating with us!"
+SLOGAN="Thank You for dining with us!"
 # Logo must be in the directory and be a .png file
 COMPANY_LOGO="—Pngtree—kitchen store logo_21004253.png"
 COMPANY_TELEPHONE="802-999-9999"
