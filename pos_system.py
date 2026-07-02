@@ -33,6 +33,9 @@ from psycopg2.extras import RealDictCursor
 # 2026-06-26. Patrick B.   Fixed issue with voided items not logging correctly.
 # 2026-06-28. Patrick Be.  Fixed issue with Receipt columns not lining up.
 # 2026-07-01. Patrick B.   Fixed issue with Department not showing correctly on screen.
+# 2026-07-02. Patrick B.   Added Quantity Key ('@') to keypad frame.
+# 2026-07-02. Patrick B.   Made all open windows go to the center of the screen.
+# 2026-07-02. Patrick B.   Worked on set_focus(0) with error dialogs.
 #------------------------------------------------------------------------
 
 #sys.stdout = open("console.log", "a")
@@ -208,6 +211,23 @@ def initialize_database():
 
     conn.commit()
     conn.close()
+def center_window(window, width=None, height=None):
+
+    window.update_idletasks()
+
+    if width is None:
+        width = window.winfo_width()
+
+    if height is None:
+        height = window.winfo_height()
+
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+
+    window.geometry(f"{width}x{height}+{x}+{y}")
 
 def validate_login(username, password):
 
@@ -993,10 +1013,11 @@ class LoginWindow:
 
         self.root = root
         self.user = None
+        self.quantity = 1
 
         self.win = tk.Toplevel(root)
         self.win.title("Login to Cash Register")
-        self.win.geometry("350x200")
+        center_window(self.win, 350, 200)
         self.win.grab_set()
 
         root.columnconfigure(0, weight=0)
@@ -1092,7 +1113,9 @@ class POS:
         self.user = user
         self.root = root
         self.root.title("POS System")
-        self.root.geometry("1200x650")
+        #self.root.geometry("1200x650")
+        center_window(self.root, 1200, 650)
+        self.quantity = 1
 
         self.cart = []
         self.subtotal = 0.0
@@ -1171,11 +1194,14 @@ class POS:
 
             sku = item["sku"]
             desc = item["description"]
+            qty = item["quantity"]
             price = item["price"]
+            extended = qty * price
 
             receipt.append(
-                f"{sku[:13]:13} {desc[:20]:20}   ${price:8.2f}"
-            )
+                f"{qty:>2} {sku[:14]:14} {desc[:20]:20} ${extended:7.2f}"
+                #f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
+            )               
 
         #receipt.append("")
         receipt.append("                              -----------------")
@@ -1239,8 +1265,8 @@ class POS:
 
         win = tk.Toplevel(self.root)
         win.title("User Maintenance")
-        win.geometry("500x500")
-
+        #win.geometry("500x500")
+        center_window(win, 500, 500)
         # User List
 
         tk.Label(
@@ -1464,6 +1490,7 @@ class POS:
         )
 
         if sale_id is None:
+            self.sku_entry.focus_set()
             return
 
         password = simpledialog.askstring(
@@ -1473,6 +1500,7 @@ class POS:
         )
 
         if not password:
+            self.sku_entry.focus_set()
             return
 
         conn = psycopg2.connect(
@@ -1495,6 +1523,7 @@ class POS:
                 "Access Denied",
                 "Manager authorization required."
             )
+            self.sku_entry.focus_set()
             return
 
         manager_name = manager[0]
@@ -1513,6 +1542,7 @@ class POS:
                 "Error",
                 "Transaction not found."
             )
+            self.sku_entry.focus_set()
             return
 
         if sale[1] == 1:
@@ -1521,6 +1551,7 @@ class POS:
                 "Error",
                 "Transaction already voided."
             )
+            self.sku_entry.focus_set()
             return
 
         if not messagebox.askyesno(
@@ -1598,6 +1629,33 @@ class POS:
             "Transaction Voided",
             f"Transaction #{sale_id} has been voided."
         )
+        
+    def set_quantity(self):
+
+        try:
+            qty = int(self.sku_var.get())
+
+            if qty <= 0:
+                raise ValueError
+
+            self.quantity = qty
+
+            self.sku_var.set("")
+
+            self.total_label.config(
+                text=f"Quantity Mode: {qty}"
+            )
+            self.sku_entry.focus_set()
+
+        except ValueError:
+
+            messagebox.showerror(
+                "Quantity",
+                "Enter a valid quantity first."
+            )
+
+            self.quantity = 1
+            self.sku_entry.focus_set()
 
     def void_item(self):
 
@@ -1608,8 +1666,10 @@ class POS:
                 "Void",
                 "Select an item first."
             )
+            self.sku_entry.focus_set()
             return
-
+        
+        
         index = selection[0]
 
         item = self.cart[index]
@@ -1620,7 +1680,7 @@ class POS:
         ):
             return
 
-        self.subtotal -= item["price"]
+        self.subtotal -= item["price"] * item["quantity"]
 
         del self.cart[index]
 
@@ -1696,7 +1756,7 @@ class POS:
         keypad = [
             ["7","8","9"],
             ["4","5","6"],
-            ["1","2","3"],
+            ["1","2","3","@"],
             ["0",".","C","Enter"]
         ]
         self.root.grid_columnconfigure(0, minsize=50)
@@ -1742,6 +1802,18 @@ class POS:
             padx=(10,0),
             pady=10
             )
+
+        #retired to keypad frame '@'
+        #Button(
+        #    keyboard_frame,
+        #    text="QTY",
+        #    command=self.set_quantity,
+        #    bg="#FFD700",
+        #    fg="#000000",
+        #    bordercolor="#333333",
+        #    width=150,
+        #    height=60
+        #).grid(row=7, column=5)
 
         Button(
             keyboard_frame,
@@ -1939,6 +2011,8 @@ class POS:
             self.sku_var.set("")
         elif key == "Enter":
             self.add_item()
+        elif key == "@":
+            self.set_quantity(),
         else:
             self.sku_var.set(self.sku_var.get()+key)
 
@@ -1954,12 +2028,14 @@ class POS:
         #    messagebox.showerror("Out of Stock","No inventory available")
         #    return
 
+        qty = self.quantity
+
         self.cart.append({
             "sku": product[1],
             "description": product[2],
             "price": product[4],
             "department": product[3],
-            "quantity": 1
+            "quantity": qty
         })
 
         #self.writeDepartment(product[3],product[4]) #department, price
@@ -1967,16 +2043,18 @@ class POS:
 
         fSku = product[1].ljust(13) #sku
         fDescription = product[2].ljust(15) #description
+        extended = product[4] * qty
         self.cart_list.insert(
             tk.END,
            # f"{fSku} {fDescription} ${product[4]:8.2f}" #price
-            f"{fSku:13} {fDescription:<45}   ${product[4]:8.2f}"
-        )
+            f"{qty:>2} {fSku:14} {fDescription:<41}   ${extended:8.2f}"
+            )
 
-        self.subtotal += product[4] #price
+        self.subtotal += product[4] * qty  #price
         self.update_totals()
         self.sku_var.set("")
         self.sku_entry.focus_set()
+        self.quantity = 1
 
     def show_x_report(self):
 
@@ -2076,8 +2154,10 @@ class POS:
                 "Enter a valid price first."
             )
             return
-        
+        qty = self.quantity
+
         match itemType:
+
             case "DEPT001": 
                 cname=DEPT001
                 cSku="DEPT001"   
@@ -2085,15 +2165,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT002":
                 cname=DEPT002
@@ -2102,15 +2183,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT003":
                 cname=DEPT003
@@ -2119,15 +2201,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT004":
                 cname=DEPT004
@@ -2136,15 +2219,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT005":
                 cname=DEPT005
@@ -2153,15 +2237,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT006":
                 cname=DEPT006
@@ -2170,15 +2255,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT007":
                 cname=DEPT007
@@ -2187,15 +2273,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
                 #self.writeDepartment(cSku,price)
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
             case "DEPT008":
                 cname=DEPT008
@@ -2204,14 +2291,16 @@ class POS:
                     "sku": cSku,
                     "description": cname,
                     "price": price,
-                    "quantity": 1
+                    "quantity": qty
                 })
+                totalAmount=price*qty
                 fname=cname.ljust(15)
                 fSku=cSku.ljust(13)
                 self.cart_list.insert(
                 tk.END,
+                
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<45}   ${price:8.2f}"
+                f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
                 )
 
                 self.sku_entry.focus_set()
@@ -2221,8 +2310,9 @@ class POS:
         #    f"DEPT001 Small Pot ${price:.2f}"
         #)
 
-        self.subtotal += price
+        self.subtotal += price * qty
         self.update_totals()
+        self.quantity = 1
 
         self.sku_var.set("")
         
@@ -2354,7 +2444,8 @@ class POS:
 
         win = tk.Toplevel(self.root)
         win.title("Checkout")
-        win.geometry("400x450")
+        #win.geometry("400x450")
+        center_window(win, 400, 450)
 
         tk.Label(
             win,
