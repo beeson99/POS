@@ -32,7 +32,7 @@ class ProductMaintenance:
         self.sku.grid(row=0, column=1)
 
         tk.Label(frm, text="Description").grid(row=0, column=2, sticky="w")
-        self.description = tk.Entry(frm, width=40)
+        self.description = tk.Entry(frm, width=45)
         self.description.grid(row=0, column=3)
 
         tk.Label(frm, text="Department").grid(row=1, column=0, sticky="w")
@@ -291,8 +291,8 @@ class ProductMaintenance:
                 active
             FROM products
             WHERE
-                sku LIKE %s
-                OR description LIKE %s
+                sku ILIKE %s
+                OR description ILIKE %s
             ORDER BY description
         """,
         (

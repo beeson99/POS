@@ -1174,7 +1174,7 @@ class POS:
             price = item["price"]
 
             receipt.append(
-                f"{sku:13} {desc:<20}   ${price:8.2f}"
+                f"{sku[:13]:13} {desc[:20]:20}   ${price:8.2f}"
             )
 
         #receipt.append("")
@@ -1581,15 +1581,15 @@ class POS:
         conn.close()
 
         receipt = f"""
-        *** VOID RECEIPT ***
+        ******* VOID RECEIPT ********
 
-        Transaction #: {sale_id}
+            Transaction #: {sale_id}
 
-        Voided By: {manager_name}
+            Voided By: {manager_name}
 
-        Date: {datetime.now():%m/%d/%Y %H:%M}
+            Date: {datetime.now():%m/%d/%Y %H:%M}
 
-        ************************
+        *****************************
         """
 
         print_x_report(receipt)
@@ -1970,7 +1970,7 @@ class POS:
         self.cart_list.insert(
             tk.END,
            # f"{fSku} {fDescription} ${product[4]:8.2f}" #price
-            f"{fSku:13} {fDescription:<20}   ${product[4]:8.2f}"
+            f"{fSku:13} {fDescription:<45}   ${product[4]:8.2f}"
         )
 
         self.subtotal += product[4] #price
@@ -2093,7 +2093,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT002":
                 cname=DEPT002
@@ -2110,7 +2110,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT003":
                 cname=DEPT003
@@ -2127,7 +2127,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT004":
                 cname=DEPT004
@@ -2144,7 +2144,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT005":
                 cname=DEPT005
@@ -2161,7 +2161,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT006":
                 cname=DEPT006
@@ -2178,7 +2178,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT007":
                 cname=DEPT007
@@ -2195,7 +2195,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
             case "DEPT008":
                 cname=DEPT008
@@ -2211,7 +2211,7 @@ class POS:
                 self.cart_list.insert(
                 tk.END,
                 #f"{fSku} {fname} ${price:8.2f}"
-                f"{fSku:13} {fname:<20}   ${price:8.2f}"
+                f"{fSku:13} {fname:<45}   ${price:8.2f}"
                 )
 
                 self.sku_entry.focus_set()
