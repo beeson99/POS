@@ -10,7 +10,7 @@ from tkinter import simpledialog
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from escpos.printer import Usb  
-import barcode
+from barcode import Code128
 from barcode.writer import ImageWriter
 from PIL import Image
 from escpos.exceptions import USBNotFoundError
@@ -18,6 +18,7 @@ import sys
 from decimal import Decimal, ROUND_HALF_UP
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from nicegui import ui
 
 #------------------------------------------------------------------------
 # Point of Sale System (POS)
@@ -36,7 +37,6 @@ from psycopg2.extras import RealDictCursor
 # 2026-07-02. Patrick B.   Added Quantity Key ('@') to keypad frame.
 # 2026-07-02. Patrick B.   Made all open windows go to the center of the screen.
 # 2026-07-02. Patrick B.   Worked on set_focus(0) with error dialogs.
-# 2026-07-22. Patrick B.   Added in Cashier totals to X and Z report.
 #------------------------------------------------------------------------
 
 #sys.stdout = open("console.log", "a")
@@ -262,17 +262,13 @@ def get_product(sku):
     return row
 
 def print_report(report_text,barcodetext):
-    
-    bc = (barcodetext)
 
-    code128_class = barcode.get_barcode_class('code128')
-
-    barcode_image = code128_class(
-        bc,
+    barcode = Code128(
+        barcodetext,
         writer=ImageWriter()
         )
 
-    barcode_image.save(
+    barcode.save(
         "barcode",
         options={
             "module_width": 0.1,   # default ~0.2
@@ -596,29 +592,6 @@ def x_report():
     deptVoidedTotal = dept08VoidTotal+dept07VoidTotal+dept06VoidTotal+dept05VoidTotal+dept04VoidTotal+dept03VoidTotal+dept02VoidTotal+dept01VoidTotal
     deptVoidCountTotal = dept08VoidCount+dept07VoidCount+dept06VoidCount+dept05VoidCount+dept04VoidCount+dept03VoidCount+dept02VoidCount+dept01VoidCount
 
-
-    cur.execute("""
-        select coalesce(sum(subtotal),0) as subtotal, coalesce(sum(tax),0) as tax, 
-            coalesce(sum(total),0) as total, coalesce(sum(cash_received),0) as cash_received, 
-            coalesce(sum(change_given),0) as change_give,
-        cashier
-        from sales
-        where voided = 0 and z_id is null
-        group by cashier
-        order by cashier
-        """)
-    rows = cur.fetchall()
-
-    cur.execute("""
-        select coalesce(sum(subtotal),0) as subtotal, coalesce(sum(tax),0) as tax, 
-            coalesce(sum(total),0) as total, coalesce(sum(cash_received),0) as cash_received, 
-            coalesce(sum(change_given),0) as change_give,
-            'totals' as cashier
-        from sales
-        where voided = 0 and z_id is null
-        """)
-    totrows = cur.fetchall()
-
     report = []
     report.append(f"{DOUBLEWIDTHHEIGHT}")
     report.append(f"{CENTER}") 
@@ -637,7 +610,7 @@ def x_report():
     report.append("-" * 42)
     report.append("Departments".center(42))
     report.append("-" * 42)
-    report.append(f"{BOLDON}     Department             Count    Amount   {BOLDOFF}")
+    report.append(f"     Department             Count    Amount   ")
     report.append(f"DEPT001 ({DEPT001:^11}): ({dept01Count:4}) ${dept01Total:8.2f}".rjust(42))
     report.append(f"DEPT002 ({DEPT002:^11}): ({dept02Count:4}) ${dept02Total:8.2f}".rjust(42))
     report.append(f"DEPT003 ({DEPT003:^11}): ({dept03Count:4}) ${dept03Total:8.2f}".rjust(42))
@@ -651,7 +624,7 @@ def x_report():
     report.append("-" * 42)
     report.append("Voids by Department".center(42))
     report.append("-" * 42)
-    report.append(f"{BOLDON}     Department             Count    Amount   {BOLDOFF}")
+    report.append(f"     Department             Count    Amount   ")
     report.append(f"DEPT001 ({DEPT001:^11}): ({dept01VoidCount:4}) ${dept01VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT002 ({DEPT002:^11}): ({dept02VoidCount:4}) ${dept02VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT003 ({DEPT003:^11}): ({dept03VoidCount:4}) ${dept03VoidTotal:8.2f}".rjust(42))
@@ -661,16 +634,6 @@ def x_report():
     report.append(f"DEPT007 ({DEPT007:^11}): ({dept07VoidCount:4}) ${dept07VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT008 ({DEPT008:^11}): ({dept08VoidCount:4}) ${dept08VoidTotal:8.2f}".rjust(42))
     report.append(f"Department Totals ({deptVoidCountTotal:4}) ${deptVoidedTotal:8.2f}".rjust(42))
-    report.append("")
-    report.append("-" * 42)
-    report.append("Breakdown by User".center(42))
-    report.append("-" * 42)
-    report.append("")
-    report.append(f"{BOLDON}Cashier       Subtotal   Tax      Total    {BOLDOFF}".rjust(42))
-    for subtotal, tax, total, cash_received, change_given, cashier in rows:
-        report.append(f"{cashier:13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
-    for subtotal, tax, total, cash_received, change_given, casheir in totrows:
-        report.append(f"{"  Total":13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
     report.append("")
     report.append("-" * 42)
     report.append("Payment Details".center(42))
@@ -937,29 +900,6 @@ def z_report():
     deptVoidCountTotal = dept08VoidCount+dept07VoidCount+dept06VoidCount+dept05VoidCount+dept04VoidCount+dept03VoidCount+dept02VoidCount+dept01VoidCount
 
     cur.execute("""
-        select coalesce(sum(subtotal),0) as subtotal, coalesce(sum(tax),0) as tax, 
-            coalesce(sum(total),0) as total, coalesce(sum(cash_received),0) as cash_received, 
-            coalesce(sum(change_given),0) as change_give,
-        cashier
-        from sales
-        where voided = 0 and z_id is null
-        group by cashier
-        order by cashier
-        """)
-    rows = cur.fetchall()
-
-    cur.execute("""
-        select coalesce(sum(subtotal),0) as subtotal, coalesce(sum(tax),0) as tax, 
-            coalesce(sum(total),0) as total, coalesce(sum(cash_received),0) as cash_received, 
-            coalesce(sum(change_given),0) as change_given,
-        'totals' as cashier
-        from public.sales
-        where voided = 0 and z_id is null
-        """)
-    totrows = cur.fetchall()
-
-
-    cur.execute("""
     INSERT INTO z_reports
     (
         transaction_count,
@@ -990,7 +930,6 @@ def z_report():
         SET z_id = %s
         WHERE z_id IS NULL
     """,(z_id,))
-
     
     
     conn.commit()
@@ -1013,7 +952,7 @@ def z_report():
     report.append("-" * 42)
     report.append("Departments".center(42))
     report.append("-" * 42)
-    report.append(f"{BOLDON}     Department             Count    Amount   {BOLDOFF}")
+    report.append(f"     Department             Count    Amount   ")
     report.append(f"DEPT001 ({DEPT001:^11}): ({dept01Count:4}) ${dept01Total:8.2f}".rjust(42))
     report.append(f"DEPT002 ({DEPT002:^11}): ({dept02Count:4}) ${dept02Total:8.2f}".rjust(42))
     report.append(f"DEPT003 ({DEPT003:^11}): ({dept03Count:4}) ${dept03Total:8.2f}".rjust(42))
@@ -1027,7 +966,7 @@ def z_report():
     report.append("-" * 42)
     report.append("Voids by Department".center(42))
     report.append("-" * 42)
-    report.append(f"{BOLDON}     Department             Count    Amount   {BOLDOFF}")
+    report.append(f"     Department             Count    Amount   ")
     report.append(f"DEPT001 ({DEPT001:^11}): ({dept01VoidCount:4}) ${dept01VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT002 ({DEPT002:^11}): ({dept02VoidCount:4}) ${dept02VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT003 ({DEPT003:^11}): ({dept03VoidCount:4}) ${dept03VoidTotal:8.2f}".rjust(42))
@@ -1037,16 +976,6 @@ def z_report():
     report.append(f"DEPT007 ({DEPT007:^11}): ({dept07VoidCount:4}) ${dept07VoidTotal:8.2f}".rjust(42))
     report.append(f"DEPT008 ({DEPT008:^11}): ({dept08VoidCount:4}) ${dept08VoidTotal:8.2f}".rjust(42))
     report.append(f"Department Totals ({deptVoidCountTotal:4}) ${deptVoidedTotal:8.2f}".rjust(42))
-    report.append("")
-    report.append("-" * 42)
-    report.append("Breakdown by User".center(42))
-    report.append("-" * 42)
-    report.append("")
-    report.append(f"{BOLDON}Cashier       Subtotal   Tax      Total   {BOLDOFF}".rjust(42))
-    for subtotal, tax, total, cash_received, change_given, cashier in rows:
-        report.append(f"{cashier:13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
-    for subtotal, tax, total, cash_received, change_given, cashier in totrows:
-        report.append(f"{"  Total":13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
     report.append("")
     report.append("-" * 42)
     report.append("Payment Details".center(42))
@@ -1261,21 +1190,17 @@ class POS:
         if duplicate:
             receipt.append("*** DUPLICATE RECEIPT ***")
             receipt.append("")
-        
-        receipt.append(f"{" QY":>2} {"SKU":14} {"Name":20} {"Price":8}")
-        receipt.append('-' * 48)
+
         for item in items:
+
             sku = item["sku"]
             desc = item["description"]
-            qty = int(item["quantity"])
-            print("qty->",qty)
-            price = float(item["price"])
-            print("Price->",price)
+            qty = item["quantity"]
+            price = item["price"]
             extended = qty * price
-            print(extended)
 
             receipt.append(
-                f"{qty:>2} {sku[:14]:14} {desc[:19]:19} ${extended:7.2f}"
+                f"{qty:>2} {sku[:14]:14} {desc[:20]:20} ${extended:7.2f}"
                 #f"{qty:2} {fSku:14} {fname:<41}   ${totalAmount:8.2f}"
             )               
 
@@ -1494,12 +1419,10 @@ class POS:
             if not selection:
                 return
 
-            # Fixed bug when user not delted.  Pulls the first in the list.
-            username = user_list.get(selection[0]).split(" ")[0]
-            #username = (
-            #    user_list.get(selection[0])
-            #    .split(" (")[0]
-            #)
+            username = (
+                user_list.get(selection[0])
+                .split(" (")[0]
+            )
 
             if username == "admin":
 
@@ -2432,7 +2355,6 @@ class POS:
             SELECT *
             FROM sales
             WHERE sale_id = %s
-            and voided = 1
         """, (sale_id,))
         voidedSale=cur.fetchone()
 
@@ -2448,26 +2370,26 @@ class POS:
         for row in cur.fetchall():
 
             items.append({
-                "sku": str(row[2]),#sku
-                "description": str(row[3]), #description
-                "price": row[5],
-                "quantity": row[4]
+                "sku": row["sku"],
+                "description": row["description"],
+                "price": row["price"],
+                "quantity": row["quantity"]
             })
 
         conn.close()
 
         receipt_text = self.build_receipt_text(
-            sale_id=sale[0],
+            sale_id=sale["sale_id"],
             items=items,
-            subtotal=sale[2],
-            tax=sale[3],
-            total_due=sale[4],
-            cash=sale[5],
-            change=sale[6],
-            cashier_name=sale[7],
-            payment_type=sale[8],
-            check_number=sale[9],
-            card_last4=sale[10],
+            subtotal=sale["subtotal"],
+            tax=sale["tax"],
+            total_due=sale["total"],
+            cash=sale["cash_received"],
+            change=sale["change_given"],
+            cashier_name=sale["cashier"],
+            payment_type=sale["payment_type"],
+            check_number=sale["check_number"],
+            card_last4=sale["card_last4"],
             duplicate=True,
             voided=voidedSale
         )
