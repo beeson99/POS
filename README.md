@@ -5,6 +5,7 @@
 | Priority |Problem              |Status    |Assigned to| 
 |:---:|:---                | :---:     | :---: |      
 |Medium|Migrate to PostgreSQL from SQLite3|in progress |PIB| 
+|High|Add user breakdown to X and Z report|✅|PIB|
 |High|Duplicate Receipts| ✅|PIB
 |Medium|User name on Receipts| ✅ |PIB|
 |High|Logo on Receipt| ✅|PIB|
