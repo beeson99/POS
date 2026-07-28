@@ -18,6 +18,7 @@ import sys
 from decimal import Decimal, ROUND_HALF_UP
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import json
 
 #------------------------------------------------------------------------
 # Point of Sale System (POS)
@@ -37,10 +38,19 @@ from psycopg2.extras import RealDictCursor
 # 2026-07-02. Patrick B.   Made all open windows go to the center of the screen.
 # 2026-07-02. Patrick B.   Worked on set_focus(0) with error dialogs.
 # 2026-07-22. Patrick B.   Added in Cashier totals to X and Z report.
+# 2026-07-22. Patrick B.   Added Register numbers
 #------------------------------------------------------------------------
 
 #sys.stdout = open("console.log", "a")
 #sys.stderr = sys.stdout
+
+with open("config.json") as f:
+    config = json.load(f)
+
+REGISTER_ID = config["register_id"]
+REGISTER_NAME = config["register_name"]
+
+print(REGISTER_NAME)
 
 # Set the following for your system.
 DB_NAME = "pos.db"
@@ -49,7 +59,7 @@ COMPANY_ADDRESS = "111 Main Street"
 COMPANY_ADDRESS2 = "Yourtown, NY 01111"
 SLOGAN="Thank You for dining with us!"
 # Logo must be in the directory and be a .png file
-COMPANY_LOGO="—Pngtree—kitchen store logo_21004253.png"
+COMPANY_LOGO="../—Pngtree—kitchen store logo_21004253.png"
 COMPANY_TELEPHONE="802-999-9999"
 TAX_RATE = 0.06
 # Set what the departments are for your buisness.
@@ -367,6 +377,7 @@ def x_report():
     FROM sales
     WHERE z_id IS NULL
         AND COALESCE(voided,0)=0
+        AND register_id = REGISTER_ID
     """)
 
     txns, subtotal, tax, total = cur.fetchone()
@@ -381,6 +392,7 @@ def x_report():
     WHERE CHECK_NUMBER is NOT NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+    AND register_id = REGISTER_ID
     """)
 
     checkTns, checkSubtotal, checkTax, checkTotal = cur.fetchone()
@@ -395,6 +407,7 @@ def x_report():
     WHERE CARD_LAST4 is NOT NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+    AND register_id = REGISTER_ID
     """)
 
     cardTns, cardSubtotal, cardTax, cardTotal = cur.fetchone()
@@ -410,6 +423,7 @@ def x_report():
     AND CHECK_NUMBER is NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+    AND register_id = REGISTER_ID
     """)
     cashTns, cashSubtotal, cashTax, cashTotal   = cur.fetchone()
     
@@ -421,6 +435,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT001'
+        AND register_id = REGISTER_ID
         """)
     dept01Count, dept01Total = cur.fetchone()
 
@@ -432,6 +447,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT002'
+        AND register_id = REGISTER_ID
         """)
     dept02Count, dept02Total = cur.fetchone()
 
@@ -443,6 +459,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT003'
+        AND register_id = REGISTER_ID
         """)
     dept03Count, dept03Total = cur.fetchone()
 
@@ -454,6 +471,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT004'
+        AND register_id = REGISTER_ID
         """)
     dept04Count, dept04Total = cur.fetchone()
 
@@ -465,6 +483,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT005'
+        AND register_id = REGISTER_ID
         """)
     dept05Count, dept05Total = cur.fetchone()
 
@@ -476,6 +495,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT006'
+        AND register_id = REGISTER_ID
         """)
     dept06Count, dept06Total = cur.fetchone()
 
@@ -487,6 +507,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT007'
+        AND register_id = REGISTER_ID
         """)
     dept07Count, dept07Total = cur.fetchone()
 
@@ -498,6 +519,7 @@ def x_report():
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT008'
+        AND register_id = REGISTER_ID
         """)
     dept08Count, dept08Total = cur.fetchone()
 
@@ -509,6 +531,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT001'
+        AND register_id = REGISTER_ID
         """)
     dept01VoidCount, dept01VoidTotal = cur.fetchone()
 
@@ -520,6 +543,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT002'
+        AND register_id = REGISTER_ID
         """)
     dept02VoidCount, dept02VoidTotal = cur.fetchone()
 
@@ -531,6 +555,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT003'
+        AND register_id = REGISTER_ID
         """)
     dept03VoidCount, dept03VoidTotal = cur.fetchone()
 
@@ -542,6 +567,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT004'
+        AND register_id = REGISTER_ID
         """)
     dept04VoidCount, dept04VoidTotal = cur.fetchone()
 
@@ -553,6 +579,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT005'
+        AND register_id = REGISTER_ID
         """)
     dept05VoidCount, dept05VoidTotal = cur.fetchone()
 
@@ -564,6 +591,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT006'
+        AND register_id = REGISTER_ID
         """)
     dept06VoidCount, dept06VoidTotal = cur.fetchone()
 
@@ -575,6 +603,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT007'
+        AND register_id = REGISTER_ID
         """)
     dept07VoidCount, dept07VoidTotal = cur.fetchone()
 
@@ -586,6 +615,7 @@ def x_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT008'
+        AND register_id = REGISTER_ID
         """)
     dept08VoidCount, dept08VoidTotal = cur.fetchone()
 
@@ -604,6 +634,7 @@ def x_report():
         cashier
         from sales
         where voided = 0 and z_id is null
+        AND register_id = REGISTER_ID
         group by cashier
         order by cashier
         """)
@@ -615,9 +646,11 @@ def x_report():
             coalesce(sum(change_given),0) as change_give,
             'totals' as cashier
         from sales
-        where voided = 0 and z_id is null
+        where register_id = REGISTER_ID
+        and voided = 0 and z_id is null
         """)
     totrows = cur.fetchall()
+
 
     report = []
     report.append(f"{DOUBLEWIDTHHEIGHT}")
@@ -713,6 +746,7 @@ def z_report():
         FROM sales
         WHERE z_id IS NULL
             AND COALESCE(voided,0)=0
+        AND register_id = REGISTER_ID
     """)
 
     txns, subtotal, total, tax = cur.fetchone()
@@ -727,6 +761,7 @@ def z_report():
     WHERE CHECK_NUMBER is NOT NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+        AND register_id = REGISTER_ID
     """)
 
     checkTns, checkSubtotal, checkTax, checkTotal = cur.fetchone()
@@ -741,6 +776,7 @@ def z_report():
     WHERE CARD_LAST4 is NOT NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+        AND register_id = REGISTER_ID
     """)
 
     cardTns, cardSubtotal, cardTax, cardTotal = cur.fetchone()
@@ -756,6 +792,7 @@ def z_report():
     AND CHECK_NUMBER is NULL
     AND z_id IS NULL
         AND COALESCE(voided,0)=0
+        AND register_id = REGISTER_ID
     """)
 
     cashTns, cashSubtotal, cashTax, cashTotal = cur.fetchone()
@@ -769,6 +806,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT001'
+        AND register_id = REGISTER_ID
         """)
     dept01Count, dept01Total = cur.fetchone()
 
@@ -779,6 +817,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT002'
+        AND register_id = REGISTER_ID
         """)
     dept02Count, dept02Total = cur.fetchone()
 
@@ -789,6 +828,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT003'
+        AND register_id = REGISTER_ID
         """)
     dept03Count, dept03Total = cur.fetchone()
 
@@ -799,6 +839,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT004'
+        AND register_id = REGISTER_ID
         """)
     dept04Count, dept04Total = cur.fetchone()
 
@@ -809,6 +850,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT005'
+        AND register_id = REGISTER_ID
         """)
     dept05Count, dept05Total = cur.fetchone()
 
@@ -819,6 +861,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT006'
+        AND register_id = REGISTER_ID
         """)
     dept06Count, dept06Total = cur.fetchone()
 
@@ -829,6 +872,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT007'
+        AND register_id = REGISTER_ID
         """)
     dept07Count, dept07Total = cur.fetchone()
 
@@ -839,6 +883,7 @@ def z_report():
         FROM department
         WHERE z_id is NULL
         and Department = 'DEPT008'
+        AND register_id = REGISTER_ID
         """)
     dept08Count, dept08Total = cur.fetchone()
 
@@ -850,6 +895,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT001'
+        AND register_id = REGISTER_ID
         """)
     dept01VoidCount, dept01VoidTotal = cur.fetchone()
 
@@ -861,6 +907,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT002'
+        AND register_id = REGISTER_ID
         """)
     dept02VoidCount, dept02VoidTotal = cur.fetchone()
 
@@ -872,6 +919,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT003'
+        AND register_id = REGISTER_ID
         """)
     dept03VoidCount, dept03VoidTotal = cur.fetchone()
 
@@ -883,6 +931,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT004'
+        AND register_id = REGISTER_ID
         """)
     dept04VoidCount, dept04VoidTotal = cur.fetchone()
 
@@ -894,6 +943,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT005'
+        AND register_id = REGISTER_ID
         """)
     dept05VoidCount, dept05VoidTotal = cur.fetchone()
 
@@ -905,6 +955,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT006'
+        AND register_id = REGISTER_ID
         """)
     dept06VoidCount, dept06VoidTotal = cur.fetchone()
 
@@ -916,6 +967,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT007'
+        AND register_id = REGISTER_ID
         """)
     dept07VoidCount, dept07VoidTotal = cur.fetchone()
 
@@ -927,6 +979,7 @@ def z_report():
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT008'
+        AND register_id = REGISTER_ID
         """)
     dept08VoidCount, dept08VoidTotal = cur.fetchone()
 
@@ -943,6 +996,7 @@ def z_report():
         cashier
         from sales
         where voided = 0 and z_id is null
+        AND register_id = REGISTER_ID
         group by cashier
         order by cashier
         """)
@@ -954,7 +1008,8 @@ def z_report():
             coalesce(sum(change_given),0) as change_given,
         'totals' as cashier
         from public.sales
-        where voided = 0 and z_id is null
+        Where register_id = REGISTER_ID
+        and voided = 0 and z_id is null
         """)
     totrows = cur.fetchall()
 
@@ -964,15 +1019,17 @@ def z_report():
     (
         transaction_count,
         sales_total,
-        tax_total
+        tax_total,
+        register_id
     )
-    VALUES (%s,%s,%s)
+    VALUES (%s,%s,%s,%s)
     RETURNING z_id
     """,
     (
         txns,
         total,
-        tax
+        tax,
+        REGISTER_ID
     ))
 
     z_id = cur.fetchone()[0]
@@ -999,6 +1056,7 @@ def z_report():
     report.append(f"{DOUBLEWIDTHHEIGHT}")
     report.append(f"{CENTER}") 
     report.append(f"Z REPORT") 
+    report.append(f"Register {REGISTER_ID}")
     report.append(f"{NORMAL}") 
     report.append(f"{formatted_now}")
     report.append("-" * 42)
@@ -1268,11 +1326,11 @@ class POS:
             sku = item["sku"]
             desc = item["description"]
             qty = int(item["quantity"])
-            print("qty->",qty)
+            #print("qty->",qty)
             price = float(item["price"])
-            print("Price->",price)
+            #print("Price->",price)
             extended = qty * price
-            print(extended)
+            #print(extended)
 
             receipt.append(
                 f"{qty:>2} {sku[:14]:14} {desc[:19]:19} ${extended:7.2f}"
@@ -1320,7 +1378,7 @@ class POS:
         
         receipt.append("")
         receipt.append(
-            f"Sale Id #{sale_id:08d} cashier: {cashier_name}"
+            f"{REGISTER_NAME} Sale Id #{sale_id:08d} cashier: {cashier_name}"
         )
 
         receipt.append("")
@@ -1794,7 +1852,8 @@ class POS:
 
         tk.Label(
             self.root,
-            text=f"User: {sname}"
+            text=f"User: {sname}        Register: {REGISTER_ID}",
+            font=("Arial",16)
         ).grid(row=0,column=6)
 
         tk.Label(self.root, text="SKU/Price Entry",
@@ -2192,7 +2251,7 @@ class POS:
             report
         )
 
-    def writeDepartment(self,dept,price,sale_id):
+    def writeDepartment(self,dept,price,quantity,sale_id):
         conn = psycopg2.connect(
             "host=localhost port=5432 dbname=posdb user=pos"
         )
@@ -2205,23 +2264,23 @@ class POS:
             sale_id,
             Department,
             price,
-            z_id
+            z_id,
+            register_id
         )
-        VALUES (%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s)
         """,
         (
             sale_id,
             dept,
-            price,
-            None
+            price * quantity,
+            None,
+            REGISTER_ID
         )
         )
 
         conn.commit()
         conn.close()
     
-    
-
     def department(self,itemType):   
 
         try:
@@ -2737,9 +2796,10 @@ class POS:
                     cashier,
                     payment_type,
                     check_number,
-                    card_last4
+                    card_last4,
+                    register_id
                 )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 RETURNING sale_id
                 """,
                 (
@@ -2751,7 +2811,8 @@ class POS:
                     user,
                     pay_type,
                     check_number,
-                    card_last4
+                    card_last4,
+                    REGISTER_ID
                 ))
 
                 sale_id = cur.fetchone()[0]
@@ -2807,7 +2868,7 @@ class POS:
                     """, (item["sku"],))
                     dept = cur.fetchone()[0]
                 #print("Dept==",dept,sale_id)
-                self.writeDepartment(dept, item["price"], sale_id)
+                self.writeDepartment(dept, item["price"], item["quantity"], sale_id)
 
             conn.commit()
             conn.close()

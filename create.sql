@@ -45,39 +45,42 @@ CREATE TABLE products (
     active INTEGER DEFAULT 1
 )
 
-CREATE TABLE department (
-    department_id BIGSERIAL PRIMARY KEY,
-    sale_id BIGINT,
-    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    department VARCHAR(20),
-    price NUMERIC(12,2),
-    z_id BIGINT,
-    voided INTEGER DEFAULT 0,
-    void_date TIMESTAMP,
-    voided_by VARCHAR(50),
+CREATE TABLE IF NOT EXISTS public.department
+(
+    department_id bigserial NOT NULL,
+    sale_id bigint,
+    sale_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    department character varying(20) COLLATE pg_catalog."default",
+    price numeric(12,2),
+    z_id bigint,
+    voided integer DEFAULT 0,
+    void_date timestamp without time zone,
+    voided_by character varying(50) COLLATE pg_catalog."default",
+    register_id integer,
+    CONSTRAINT department_pkey PRIMARY KEY (department_id)
+)
 
-    CONSTRAINT fk_department_sales
-        FOREIGN KEY (sale_id)
-        REFERENCES sales(sale_id)
-);
 
-CREATE TABLE sales (
-    sale_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    subtotal NUMERIC(12,2),
-    tax NUMERIC(12,2),
-    total NUMERIC(12,2),
-    cash_received NUMERIC(12,2),
-    change_given NUMERIC(12,2),
-    cashier VARCHAR(50),
-    payment_type VARCHAR(20),
-    check_number VARCHAR(50),
-    card_last4 VARCHAR(4),
-    z_id BIGINT,
-    voided INTEGER DEFAULT 0,
-    void_date TIMESTAMP,
-    voided_by VARCHAR(50)
-);
+CREATE TABLE IF NOT EXISTS public.sales
+(
+    sale_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    sale_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    subtotal numeric(12,2),
+    tax numeric(12,2),
+    total numeric(12,2),
+    cash_received numeric(12,2),
+    change_given numeric(12,2),
+    cashier character varying(50) COLLATE pg_catalog."default",
+    payment_type character varying(20) COLLATE pg_catalog."default",
+    check_number character varying(50) COLLATE pg_catalog."default",
+    card_last4 character varying(4) COLLATE pg_catalog."default",
+    z_id bigint,
+    voided integer DEFAULT 0,
+    void_date timestamp without time zone,
+    voided_by character varying(50) COLLATE pg_catalog."default",
+    register_id integer,
+    CONSTRAINT sales_pkey PRIMARY KEY (sale_id)
+)
 
 CREATE TABLE sale_items (
     sale_item_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -93,13 +96,15 @@ CREATE TABLE sale_items (
         ON DELETE CASCADE
 );
 
-CREATE TABLE z_reports (
-    z_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    report_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    transaction_count INTEGER,
-    sales_total NUMERIC(12,2),
-    tax_total NUMERIC(12,2)
-);
+CREATE TABLE IF NOT EXISTS public.z_reports
+(
+    z_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    report_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    transaction_count integer,
+    sales_total numeric(12,2),
+    tax_total numeric(12,2),
+    register_id integer,
+    CONSTRAINT z_reports_pkey PRIMARY KEY (z_id)
 
 
 CREATE INDEX idx_products_sku
