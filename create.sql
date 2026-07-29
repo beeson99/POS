@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.department
     void_date timestamp without time zone,
     voided_by character varying(50) COLLATE pg_catalog."default",
     register_id integer,
+    quantity integer,
     CONSTRAINT department_pkey PRIMARY KEY (department_id)
 )
 

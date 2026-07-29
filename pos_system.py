@@ -430,194 +430,210 @@ def x_report():
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT001'
         AND register_id = REGISTER_ID
         """)
-    dept01Count, dept01Total = cur.fetchone()
+    dept01Count, dept01Total, dept01Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT002'
         AND register_id = REGISTER_ID
         """)
-    dept02Count, dept02Total = cur.fetchone()
+    dept02Count, dept02Total, dept02Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT003'
         AND register_id = REGISTER_ID
         """)
-    dept03Count, dept03Total = cur.fetchone()
+    dept03Count, dept03Total, dept03Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT004'
         AND register_id = REGISTER_ID
         """)
-    dept04Count, dept04Total = cur.fetchone()
+    dept04Count, dept04Total, dept04Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT005'
         AND register_id = REGISTER_ID
         """)
-    dept05Count, dept05Total = cur.fetchone()
+    dept05Count, dept05Total, dept05Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT006'
         AND register_id = REGISTER_ID
         """)
-    dept06Count, dept06Total = cur.fetchone()
+    dept06Count, dept06Total, dept06Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT007'
         AND register_id = REGISTER_ID
         """)
-    dept07Count, dept07Total = cur.fetchone()
+    dept07Count, dept07Total, dept07Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided = 0
         and Department = 'DEPT008'
         AND register_id = REGISTER_ID
         """)
-    dept08Count, dept08Total = cur.fetchone()
+    dept08Count, dept08Total, dept08Quantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT001'
         AND register_id = REGISTER_ID
         """)
-    dept01VoidCount, dept01VoidTotal = cur.fetchone()
+    dept01VoidCount, dept01VoidTotal,dept01VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT002'
         AND register_id = REGISTER_ID
         """)
-    dept02VoidCount, dept02VoidTotal = cur.fetchone()
+    dept02VoidCount, dept02VoidTotal,dept02VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT003'
         AND register_id = REGISTER_ID
         """)
-    dept03VoidCount, dept03VoidTotal = cur.fetchone()
+    dept03VoidCount, dept03VoidTotal,dept03VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT004'
         AND register_id = REGISTER_ID
         """)
-    dept04VoidCount, dept04VoidTotal = cur.fetchone()
+    dept04VoidCount, dept04VoidTotal, dept04VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT005'
         AND register_id = REGISTER_ID
         """)
-    dept05VoidCount, dept05VoidTotal = cur.fetchone()
+    dept05VoidCount, dept05VoidTotal, dept05VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT006'
         AND register_id = REGISTER_ID
         """)
-    dept06VoidCount, dept06VoidTotal = cur.fetchone()
+    dept06VoidCount, dept06VoidTotal, dept06VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT007'
         AND register_id = REGISTER_ID
         """)
-    dept07VoidCount, dept07VoidTotal = cur.fetchone()
+    dept07VoidCount, dept07VoidTotal, dept07VoidQuantity = cur.fetchone()
 
     cur.execute("""
         SElECT
             COUNT(*),
-            COALESCE(SUM(price),0)
+            COALESCE(SUM(price),0),
+            coalesce(sum(quantity),0)
         FROM department
         WHERE z_id is NULL
         and voided > 0
         and Department = 'DEPT008'
         AND register_id = REGISTER_ID
         """)
-    dept08VoidCount, dept08VoidTotal = cur.fetchone()
+    dept08VoidCount, dept08VoidTotal, dept08VoidQuantity = cur.fetchone()
 
 
 
@@ -2265,16 +2281,18 @@ class POS:
             Department,
             price,
             z_id,
-            register_id
+            register_id,
+            quantity
         )
-        VALUES (%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s)
         """,
         (
             sale_id,
             dept,
             price * quantity,
             None,
-            REGISTER_ID
+            REGISTER_ID,
+            quantity
         )
         )
 
