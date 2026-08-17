@@ -15,7 +15,7 @@ from CTkMessagebox import CTkMessagebox
 import config
 from config import (
     REGISTER_ID, DEPT001, DEPT002, DEPT003, DEPT004,
-    DEPT005, DEPT006, DEPT007, DEPT008, DEPARTMENTS,
+    DEPT005, DEPT006, DEPT007, DEPT008, DEPARTMENTS,COMPANY_LOGO,
 )
 from cart import Cart
 import auth
@@ -23,6 +23,7 @@ import database
 import reports
 from receipts import build_receipt_text, build_void_receipt
 from printer import print_receipt, print_report, print_x_report
+from PIL import Image, ImageTk
 
 
 def center_window(window, width=None, height=None):
@@ -51,11 +52,34 @@ class LoginWindow:
 
         self.win = tk.Toplevel(root)
         self.win.title("Login to Cash Register")
-        center_window(self.win, 350, 200)
+        center_window(self.win, 350, 350)
         self.win.grab_set()
 
         root.columnconfigure(0, weight=0)
         root.rowconfigure(0, weight=0)
+        # =========================
+        # Company Logo
+        # =========================
+        try:
+            logo_image = Image.open(COMPANY_LOGO)
+
+            # Resize while maintaining aspect ratio
+            max_width = 300
+            max_height = 120
+
+            logo_image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+
+            self.logo_photo = ImageTk.PhotoImage(logo_image)
+
+            logo_label = tk.Label(
+                self.win,
+                image=self.logo_photo,
+                borderwidth=0
+        )   
+            logo_label.pack(pady=(15, 10))
+
+        except Exception as e:
+            print(f"Unable to load company logo: {e}")
 
         tk.Label(self.win, text="Username").pack(pady=5)
         self.username = tk.Entry(self.win)

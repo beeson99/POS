@@ -20,24 +20,24 @@ REGISTER_ID = _config["register_id"]
 REGISTER_NAME = _config["register_name"]
 
 # ── Company settings ─────────────────────────────────────────────────
-COMPANY_NAME = "The Kitchen"
+COMPANY_NAME = "Shoppers World"
 COMPANY_ADDRESS = "111 Main Street"
 COMPANY_ADDRESS2 = "Yourtown, NY 01111"
-SLOGAN = "Thank You for dining with us!"
+SLOGAN = "Thank You for shopping with us!"
 COMPANY_TELEPHONE = "802-999-9999"
 TAX_RATE = 0.06
 
 # Logo must be in the project directory and be a .png file
-COMPANY_LOGO = os.path.join(os.path.dirname(__file__), "..", "—Pngtree—kitchen store logo_21004253.png")
+COMPANY_LOGO = os.path.join(os.path.dirname(__file__), "shoppers_world_black_white.png")
 
 # ── Departments ───────────────────────────────────────────────────────
 DEPT001 = "Food"
-DEPT002 = "Office"
-DEPT003 = "Printing"
-DEPT004 = "Dept 004"
-DEPT005 = "Dept 005"
-DEPT006 = "Dept 006"
-DEPT007 = "Dept 007"
+DEPT002 = "HBA"
+DEPT003 = "Stationary"
+DEPT004 = "Paper Goods"
+DEPT005 = "Electronics"
+DEPT006 = "Cameras"
+DEPT007 = "Toys"
 DEPT008 = "Dept 008"
 
 # Department lookup for convenience

@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "register",
+			"path": "."
+		},
+		{
+			"name": "modules",
+			"path": "../../Downloads/f04c97f4d_POS-refactored/modules"
+		}
+	],
+	"settings": {
+		"python-envs.defaultEnvManager": "ms-python.python:system",
+		"git.ignoreLimitWarning": true
+	}
+}

@@ -82,6 +82,56 @@ def _get_payment_totals(cur, register_id):
     }
 
 
+def _get_payment_totals_by_register(cur):
+    """Return dict: register_id -> {'cash': (cnt, total), 'card': (cnt, total),
+    'check': (cnt, total)} for the current open batch, across ALL registers."""
+    registers = {}
+
+    # Discover which registers have open activity
+    cur.execute("""
+        SELECT DISTINCT register_id
+        FROM sales
+        WHERE z_id IS NULL AND COALESCE(voided, 0) = 0
+    """)
+    for (reg_id,) in cur.fetchall():
+        registers[reg_id] = {"cash": (0, 0), "card": (0, 0), "check": (0, 0)}
+
+    cur.execute("""
+        SELECT register_id, COUNT(*), COALESCE(SUM(total), 0)
+        FROM sales
+        WHERE check_number IS NOT NULL
+          AND z_id IS NULL AND COALESCE(voided, 0) = 0
+        GROUP BY register_id
+    """)
+    for reg_id, cnt, total in cur.fetchall():
+        registers.setdefault(reg_id, {"cash": (0, 0), "card": (0, 0), "check": (0, 0)})
+        registers[reg_id]["check"] = (cnt, total)
+
+    cur.execute("""
+        SELECT register_id, COUNT(*), COALESCE(SUM(total), 0)
+        FROM sales
+        WHERE card_last4 IS NOT NULL
+          AND z_id IS NULL AND COALESCE(voided, 0) = 0
+        GROUP BY register_id
+    """)
+    for reg_id, cnt, total in cur.fetchall():
+        registers.setdefault(reg_id, {"cash": (0, 0), "card": (0, 0), "check": (0, 0)})
+        registers[reg_id]["card"] = (cnt, total)
+
+    cur.execute("""
+        SELECT register_id, COUNT(*), COALESCE(SUM(total), 0)
+        FROM sales
+        WHERE card_last4 IS NULL AND check_number IS NULL
+          AND z_id IS NULL AND COALESCE(voided, 0) = 0
+        GROUP BY register_id
+    """)
+    for reg_id, cnt, total in cur.fetchall():
+        registers.setdefault(reg_id, {"cash": (0, 0), "card": (0, 0), "check": (0, 0)})
+        registers[reg_id]["cash"] = (cnt, total)
+
+    return registers
+
+
 def _get_department_totals(cur, register_id, include_quantity=True):
     """Return dict of per-department counts and totals (non-voided)."""
     results = {}
@@ -136,6 +186,39 @@ def _get_department_voids(cur, register_id, include_quantity=True):
     return results
 
 
+def _get_register_breakdown(cur):
+    """Return (per_register_rows, totals_row) across ALL registers.
+
+    Unlike the other helpers, this is intentionally NOT filtered to a
+    single register_id -- it shows the current open batch (z_id IS NULL,
+    not voided) broken down by every register that has activity.
+    """
+    cur.execute("""
+        SELECT register_id,
+               COUNT(*),
+               COALESCE(SUM(subtotal), 0),
+               COALESCE(SUM(tax), 0),
+               COALESCE(SUM(total), 0)
+        FROM sales
+        WHERE voided = 0 AND z_id IS NULL
+        GROUP BY register_id
+        ORDER BY register_id
+    """)
+    rows = cur.fetchall()
+
+    cur.execute("""
+        SELECT COUNT(*),
+               COALESCE(SUM(subtotal), 0),
+               COALESCE(SUM(tax), 0),
+               COALESCE(SUM(total), 0)
+        FROM sales
+        WHERE voided = 0 AND z_id IS NULL
+    """)
+    totrow = cur.fetchone()
+
+    return rows, totrow
+
+
 def _get_cashier_breakdown(cur, register_id):
     """Return (per_cashier_rows, totals_row)."""
     cur.execute("""
@@ -170,7 +253,8 @@ def _get_cashier_breakdown(cur, register_id):
 
 
 def _format_report(now_str, pay, dept_totals, dept_voids,
-                   cashier_rows, totals_rows, include_quantity=False):
+                   cashier_rows, totals_rows, register_rows, register_totrow,
+                   payment_by_register, include_quantity=False):
     """Build the report text string. Shared by X and Z reports."""
     report = []
     report.append(f"{DOUBLEWIDTHHEIGHT}")
@@ -197,11 +281,11 @@ def _format_report(now_str, pay, dept_totals, dept_voids,
     dept_amount_total = 0
     for dept_code in sorted(DEPARTMENTS.keys()):
         dept_name = DEPARTMENTS[dept_code]
-        count, total = dept_totals[dept_code][0], dept_totals[dept_code][1]
-        dept_count_total += count
+        _, total, quantity = dept_totals[dept_code]
+        dept_count_total += quantity
         dept_amount_total += total
         report.append(
-            f"{dept_code} ({dept_name:^11}): ({count:4}) ${total:8.2f}".rjust(42)
+            f"{dept_code} ({dept_name:^11}): ({quantity:4}) ${total:8.2f}".rjust(42)
         )
     report.append(
         f"Department Totals ({dept_count_total:4}) ${dept_amount_total:8.2f}".rjust(42)
@@ -242,17 +326,55 @@ def _format_report(now_str, pay, dept_totals, dept_voids,
         subtotal, tax, total, cash_rec, change_given, cashier = row
         report.append(f"{'  Total':13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
 
-    # Payment details
+    # Register breakdown
     report.append("")
     report.append("-" * 42)
-    report.append("Payment Details".center(42))
+    report.append("Breakdown by Register".center(42))
     report.append("-" * 42)
-    cashTns, cashTotal = pay["cash"]
-    cardTns, cardTotal = pay["card"]
-    checkTns, checkTotal = pay["check"]
-    report.append(f"{'Cash':<15}{cashTns:>5} ${cashTotal:>10.2f}".rjust(42))
-    report.append(f"{'Credit':<15}{cardTns:>5} ${cardTotal:>10.2f}".rjust(42))
-    report.append(f"{'Checks':<15}{checkTns:>5} ${checkTotal:>10.2f}".rjust(42))
+    report.append("")
+    report.append(f"{BOLDON}Register      Subtotal   Tax      Total   {BOLDOFF}".rjust(42))
+    for row in register_rows:
+        reg_id, txns, subtotal, tax, total = row
+        report.append(f"{str(reg_id):13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
+    if register_totrow:
+        _, subtotal, tax, total = register_totrow
+        report.append(f"{'  Total':13} ${subtotal:8.2f} ${tax:8.2f} ${total:8.2f}")
+
+    # Payment details, broken down by register
+    report.append("")
+    report.append("-" * 42)
+    report.append("Payment Details by Register".center(42))
+    report.append("-" * 42)
+
+    grand_cash_txns = grand_cash_total = 0
+    grand_card_txns = grand_card_total = 0
+    grand_check_txns = grand_check_total = 0
+
+    for reg_id in sorted(payment_by_register.keys(), key=str):
+        reg_pay = payment_by_register[reg_id]
+        cashTns, cashTotal = reg_pay["cash"]
+        cardTns, cardTotal = reg_pay["card"]
+        checkTns, checkTotal = reg_pay["check"]
+
+        report.append("")
+        report.append(f"{BOLDON}Register {reg_id}{BOLDOFF}")
+        report.append(f"{'Cash':<15}{cashTns:>5} ${cashTotal:>10.2f}".rjust(42))
+        report.append(f"{'Credit':<15}{cardTns:>5} ${cardTotal:>10.2f}".rjust(42))
+        report.append(f"{'Checks':<15}{checkTns:>5} ${checkTotal:>10.2f}".rjust(42))
+
+        grand_cash_txns += cashTns
+        grand_cash_total += cashTotal
+        grand_card_txns += cardTns
+        grand_card_total += cardTotal
+        grand_check_txns += checkTns
+        grand_check_total += checkTotal
+
+    report.append("")
+    report.append("-" * 42)
+    report.append(f"{BOLDON}All Registers{BOLDOFF}")
+    report.append(f"{'Cash':<15}{grand_cash_txns:>5} ${grand_cash_total:>10.2f}".rjust(42))
+    report.append(f"{'Credit':<15}{grand_card_txns:>5} ${grand_card_total:>10.2f}".rjust(42))
+    report.append(f"{'Checks':<15}{grand_check_txns:>5} ${grand_check_total:>10.2f}".rjust(42))
     report.append("")
     report.append("")
 
@@ -260,7 +382,8 @@ def _format_report(now_str, pay, dept_totals, dept_voids,
 
 
 def x_report():
-    """Generate and print an X report. Returns the report text."""
+    """Generate and print an X report. Returns a short confirmation string
+    (the full report text is sent to the printer, not returned for display)."""
     now = datetime.now()
     formatted_now = now.strftime("%m/%d/%Y %H:%M")
 
@@ -271,24 +394,29 @@ def x_report():
     dept_totals = _get_department_totals(cur, REGISTER_ID, include_quantity=True)
     dept_voids = _get_department_voids(cur, REGISTER_ID, include_quantity=True)
     cashier_rows, totals_rows = _get_cashier_breakdown(cur, REGISTER_ID)
+    register_rows, register_totrow = _get_register_breakdown(cur)
+    payment_by_register = _get_payment_totals_by_register(cur)
 
     conn.close()
 
     report_text = _format_report(
         formatted_now, pay, dept_totals, dept_voids,
-        cashier_rows, totals_rows,
+        cashier_rows, totals_rows, register_rows, register_totrow,
+        payment_by_register,
     )
 
     try:
         print_x_report(report_text)
+        return "X Report printed"
     except Exception as e:
         print(f"Printer Error: {e}")
-
-    return report_text
+        return f"X Report generated, but printing failed: {e}"
 
 
 def z_report():
-    """Generate and print a Z report, then close out all sales. Returns report text."""
+    """Generate and print a Z report, then close out all sales.
+    Returns a short confirmation string (the full report text is sent
+    to the printer, not returned for display)."""
     now = datetime.now()
     formatted_now = now.strftime("%m/%d/%Y %H:%M")
 
@@ -296,15 +424,18 @@ def z_report():
     cur = conn.cursor()
 
     pay = _get_payment_totals(cur, REGISTER_ID)
-    dept_totals = _get_department_totals(cur, REGISTER_ID, include_quantity=False)
+    dept_totals = _get_department_totals(cur, REGISTER_ID, include_quantity=True)
     dept_voids = _get_department_voids(cur, REGISTER_ID, include_quantity=False)
     cashier_rows, totals_rows = _get_cashier_breakdown(cur, REGISTER_ID)
+    register_rows, register_totrow = _get_register_breakdown(cur)
+    payment_by_register = _get_payment_totals_by_register(cur)
 
     conn.close()
 
     report_text = _format_report(
         formatted_now, pay, dept_totals, dept_voids,
-        cashier_rows, totals_rows,
+        cashier_rows, totals_rows, register_rows, register_totrow,
+        payment_by_register,
     )
 
     # Close out: create z_report record and assign z_id to sales/departments
@@ -316,7 +447,7 @@ def z_report():
 
     try:
         print_x_report(report_text)
+        return "Z Report printed"
     except Exception as e:
         print(f"Printer Error: {e}")
-
-    return report_text
+        return f"Z Report generated, but printing failed: {e}"
